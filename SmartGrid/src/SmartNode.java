@@ -2,11 +2,9 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -45,7 +43,8 @@ public class SmartNode {
 			{
 				//Client
 				//Connect to Servers
-				clientCode(currentNode);				
+				ArrayList<String> totalPowerConsumed = clientCode(currentNode);	
+				adjustPowerProfile(totalPowerConsumed,currentNode);
 			}
 		}
 		finally {
@@ -54,6 +53,22 @@ public class SmartNode {
 		}
 		
 		
+		
+	}
+
+
+	private static void adjustPowerProfile(
+			ArrayList<String> totalPowerConsumed, int currentNode) {
+		// TODO Auto-generated method stub
+		/**
+		 * @TODO Find PAR,Variance of TPCS = TPCN1 + TPCN2 + TPCN3
+		 * Change appliance PowerProfile and hence TPCN of current node s.t PAR and variance of TPCS is minimum
+		 * Update TPCN
+		 */
+		
+		/**
+		 * @DOUBT How to automate multiple iterations across multiple nodes?
+		 */
 		
 	}
 
@@ -78,30 +93,41 @@ public class SmartNode {
 				};
 		
 		double[] AppliancePowerConsumption = null ;
+		ArrayList<String> Constraints = new ArrayList<String>();
+		String constraint1= null,constraint2=null;
 		//1 by 11 matrix
 		if(currentNode == 1)
 		{
 			//Appliance 1 and 2
 			AppliancePowerConsumption = new double[]{0.07, 0.05, 0.1, 0.15, 1.6, 1.5, 2.5, 0.3, 0.04, 2, 1.8};
 			//Appliance 1 : 5 hrs, 6pm to 7am
+			constraint1 = "5 18 7";
 			//Appliance 2 : 2 hrs, 9am to 5pm
+			constraint2 = "2 9 17";			
 		}
 		else if(currentNode == 2)
 		{
 			//Appliance 1 and 3
 			AppliancePowerConsumption = new double[]{0.07, 0.05, 0.1, 0.15, 1.6, 1.5, 2.5, 0.3, 0.04, 2, 2}	;
 			//Appliance 1 : 5 hrs, 6pm to 7am
+			constraint1 = "5 18 7";
 			//Appliance 3 : 2 hrs, 11pm to 8am
+			constraint2 = "2 23 8";		
 		}
 		else if(currentNode == 3)
 		{
 			//Appliance 1 and 2
 			AppliancePowerConsumption = new double[]{0.07, 0.05, 0.1, 0.15, 1.6, 1.5, 2.5, 0.3, 0.04, 2, 1.8}	;
 			//Appliance 1 : 5 hrs, 6pm to 7am
+			constraint1 = "5 18 7";
 			//Appliance 2 : 2 hrs, 9am to 5pm
+			constraint2 = "2 9 17";
 		}
-		
-		//Random power profile of flexible appliances
+		Constraints.add(constraint1);
+		Constraints.add(constraint2);
+		/**
+		 * @TODO Random power profile of flexible appliances
+		 */
 		
 		double[] totalPowerConsumptionNode= new double[24];
 		
@@ -123,7 +149,7 @@ public class SmartNode {
 	}
 
 
-	private static void clientCode(int currentNode) throws Exception {
+	private static ArrayList<String> clientCode(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 		String input="";
 		String[] ipAddressPortNumber;
@@ -154,7 +180,27 @@ public class SmartNode {
 		        totalPowerConsumed.add(fileInput);
 		        clientSocket.close();  				        
 			}
+			else
+			{
+				String fileContents;
+                BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt"));
+            	  try {
+            	        StringBuilder sb = new StringBuilder();
+            	        String line = br.readLine();
+
+            	        while (line != null) {
+            	            sb.append(line);
+            	            sb.append(" ");
+            	            line = br.readLine();
+            	        }
+            	        fileContents = sb.toString();
+            	    } finally {
+            	        br.close();
+            	    }
+            	  totalPowerConsumed.add(fileContents);			
+			}
 		}
+		return totalPowerConsumed;
 	}
 
 	private static void serverCode(int currentNode) throws Exception {
