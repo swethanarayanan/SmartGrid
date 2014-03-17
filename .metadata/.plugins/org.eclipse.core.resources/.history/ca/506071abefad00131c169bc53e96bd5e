@@ -107,9 +107,7 @@ public class SmartNode {
 		{
 			variance += (tPCS[i]-avg)*(tPCS[i]-avg);
 		}
-		variance /= 24;
 		
-		return variance;
 	}
 
 

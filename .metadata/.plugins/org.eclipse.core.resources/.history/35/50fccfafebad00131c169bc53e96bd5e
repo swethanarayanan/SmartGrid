@@ -87,58 +87,8 @@ public class SmartNode {
 		}
 		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt",TPCS);
 	
-		double average = getAvgPCS(TPCS);
-		double peakToAvg = 0;
-		double variance = 0;
-		
-		if(average!=0)
-			peakToAvg = getLargestValue(TPCS)/average;
-		
-		variance = getVariance(TPCS, average);
-		
-		
+		int average = getAPCS(TPCS);
 	}
-
-	private static double getVariance(double[] tPCS, double avg) {
-		// TODO Auto-generated method stub
-		
-		double variance = 0;
-		for(int i=0;i<24;i++)
-		{
-			variance += (tPCS[i]-avg)*(tPCS[i]-avg);
-		}
-		variance /= 24;
-		
-		return variance;
-	}
-
-
-	private static double getLargestValue(double[] tPCS) {
-		// TODO Auto-generated method stub
-
-		double largest = 0;
-		for(int i=0;i<24;i++)
-		{
-			if(tPCS[i]>largest)
-				largest = tPCS[i];
-		}
-		return largest;
-	}
-
-
-	private static double getAvgPCS(double[] TPCS) {
-		// TODO Auto-generated method stub
-
-		double sum=0;
-		for (int i=0;i<24;i++)
-		{
-			sum += TPCS[i];
-		}
-		
-		return sum/24.0;
-		
-	}
-
 
 	private static String readFileIntoString(String filePath) throws Exception {
 		// TODO Auto-generated method stub

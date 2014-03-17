@@ -94,24 +94,10 @@ public class SmartNode {
 		if(average!=0)
 			peakToAvg = getLargestValue(TPCS)/average;
 		
-		variance = getVariance(TPCS, average);
+		variance = getVariance(TPCS);
 		
 		
 	}
-
-	private static double getVariance(double[] tPCS, double avg) {
-		// TODO Auto-generated method stub
-		
-		double variance = 0;
-		for(int i=0;i<24;i++)
-		{
-			variance += (tPCS[i]-avg)*(tPCS[i]-avg);
-		}
-		variance /= 24;
-		
-		return variance;
-	}
-
 
 	private static double getLargestValue(double[] tPCS) {
 		// TODO Auto-generated method stub

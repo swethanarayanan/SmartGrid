@@ -110,6 +110,7 @@ public class SmartNode {
 		variance /= 24;
 		
 		return variance;
+		
 	}
 
 
