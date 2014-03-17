@@ -69,14 +69,24 @@ public class SmartNode {
 		 * @DOUBT How to automate multiple iterations across multiple nodes?
 		 */
 		//Maintain TPCS
+		String TPCS = "";
 		String TPCN1 = readFileIntoString("TPCN_1.txt");
 		String TPCN2 = readFileIntoString("TPCN_2.txt");
 		String TPCN3 = readFileIntoString("TPCN_3.txt");
 		
-		String[] TPCN1ByHour = TPCN1.split("");
-		String[] TPCN2ByHour = TPCN1.split("");
-		String[] TPCN3ByHour = TPCN1.split("");
+		String[] TPCN1_24Hour = TPCN1.split("");
+		String[] TPCN2_24Hour = TPCN2.split("");
+		String[] TPCN3_24Hour = TPCN3.split("");
 		
+		for(int i=0;i<24;i++)
+		{
+			int TPCN1ByHour = Integer.parseInt(TPCN1_24Hour[i]);
+			int TPCN2ByHour = Integer.parseInt(TPCN2_24Hour[i]);
+			int TPCN3ByHour = Integer.parseInt(TPCN3_24Hour[i]);
+			
+			int TPCNSByHour = TPCN1ByHour + TPCN2ByHour + TPCN3ByHour;
+			TPCS += String.valueOf(TPCNSByHour)+" ";
+		}
 	}
 
 
