@@ -22,21 +22,44 @@ public class SmartNode {
 
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
-
+	
 	public static void main(String[] args) throws Exception {
-
+	
 		ipAddressList.put(1,"127.0.0.1 6787");
 		ipAddressList.put(2,"127.0.0.1 6788");
 		ipAddressList.put(3,"127.0.0.1 6789");		
-		Scanner scanner = new Scanner (System.in);
-		System.out.println("\n Choose node: \n 1. Node 1 \n 2. Node 2 \n 3. Node 3");
-		int currentNode = scanner.nextInt();
-		scanner.close();
-		initializePowerData(currentNode);
-		runServer(currentNode);
-		runClient(currentNode);	
-
-		//Send message to the other two nodes job done , randomly choose next client,,make itself a server	
+		Scanner scanner = null;
+		int currentNode;
+		
+		try
+		{
+			scanner = new Scanner (System.in);
+			System.out.println("\n Choose node: \n 1. Node 1 \n 2. Node 2 \n 3. Node 3");
+			currentNode = scanner.nextInt();
+			initializePowerData(currentNode);
+			scanner = new Scanner (System.in);
+			System.out.println("\n Choose option: \n 1. Act as Server \n 2. Act as Client");	
+			int option = scanner.nextInt();
+			if(option == 1)
+			{
+				serverCode(currentNode);
+				
+			}
+			else if(option == 2)
+			{
+				//Client
+				//Connect to Servers
+				clientCode(currentNode);	
+				adjustPowerProfile(currentNode);
+			}
+		}
+		finally {
+			if(scanner!=null)
+				scanner.close();
+		}
+		//Send message to the other two nodes job done , randomly choose next client,,make itself a server
+		
+		
 	}
 
 
@@ -47,7 +70,7 @@ public class SmartNode {
 		 * Change appliance PowerProfile and hence TPCN of current node s.t PAR and variance of TPCS is minimum
 		 * Update TPCN
 		 */
-
+		
 		/**
 		 * @DOUBT How to automate multiple iterations across multiple nodes?
 		 */
@@ -56,7 +79,8 @@ public class SmartNode {
 		double[] TPCN1 = readFileIntoDoubleArray("TPCN_1.txt");
 		double[] TPCN2 = readFileIntoDoubleArray("TPCN_2.txt");
 		double[] TPCN3 = readFileIntoDoubleArray("TPCN_3.txt");
-
+		
+		
 		for(int i=0;i<24;i++)
 		{			
 			TPCS[i] = TPCN1[i] + TPCN2[i] + TPCN3[i];
@@ -65,29 +89,12 @@ public class SmartNode {
 	
 		double average = getAvgPCS(TPCS);
 		double peakToAvg = 0;
-		double variance = 0;
 		
 		if(average!=0)
 			peakToAvg = getLargestValue(TPCS)/average;
 		
-		variance = getVariance(TPCS, average);
-		
 		
 	}
-
-	private static double getVariance(double[] tPCS, double avg) {
-		// TODO Auto-generated method stub
-		
-		double variance = 0;
-		for(int i=0;i<24;i++)
-		{
-			variance += (tPCS[i]-avg)*(tPCS[i]-avg);
-		}
-		variance /= 24;
-		
-		return variance;
-	}
-
 
 	private static double getLargestValue(double[] tPCS) {
 		// TODO Auto-generated method stub
@@ -98,7 +105,6 @@ public class SmartNode {
 			if(tPCS[i]>largest)
 				largest = tPCS[i];
 		}
-		return largest;
 	}
 
 
@@ -118,43 +124,43 @@ public class SmartNode {
 
 	private static String readFileIntoString(String filePath) throws Exception {
 		// TODO Auto-generated method stub
+				
+	  String fileContents="";
+	  BufferedReader br = new BufferedReader(new FileReader(filePath));
+  	  try {
+  	        StringBuilder sb = new StringBuilder();
+  	        String line = br.readLine();
 
-		String fileContents="";
-		BufferedReader br = new BufferedReader(new FileReader(filePath));
-		try {
-			StringBuilder sb = new StringBuilder();
-			String line = br.readLine();
-
-			while (line != null) {
-				sb.append(line);
-				sb.append(" ");
-				line = br.readLine();
-			}
-			fileContents = sb.toString();
-		} finally {
-			br.close();
-		}
+  	        while (line != null) {
+  	            sb.append(line);
+  	            sb.append(" ");
+  	            line = br.readLine();
+  	        }
+  	        fileContents = sb.toString();
+  	    } finally {
+  	        br.close();
+  	    }
 		return fileContents;
 	}
-
+	
 	private static double[] readFileIntoDoubleArray(String filePath) throws Exception {
 		// TODO Auto-generated method stub
+	
+		 double[] TPC= new double[24];
+		 int i =0;
+		  BufferedReader br = new BufferedReader(new FileReader(filePath));
+	  	  try {
+	  	        TPC[i] = Double.valueOf(br.readLine());
 
-		double[] TPC= new double[24];
-		int i =0;
-		BufferedReader br = new BufferedReader(new FileReader(filePath));
-		try {
-			TPC[i] = Double.valueOf(br.readLine());
-			i++;
-			while (i<24) {		  	        	
-				TPC[i] = Double.valueOf(br.readLine());
-				i++;
-			};
-		} finally {
-			br.close();
-		}
-		return TPC;
-
+	  	        while (i<24) {	  	           
+	  	        	TPC[i] = Double.valueOf(br.readLine());
+	  	            i++;
+	  	        };
+	  	    } finally {
+	  	        br.close();
+	  	    }
+			return TPC;
+		
 	}
 	private static void writeStringArrayToFile(String filePath,String fileInput) throws Exception 
 	{
@@ -175,7 +181,7 @@ public class SmartNode {
 		}
 		writer.close();
 	}
-
+	
 	private static void initializePowerData(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 
@@ -193,8 +199,8 @@ public class SmartNode {
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 				{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 				{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-		};
-
+				};
+		
 		double[] AppliancePowerConsumption = null ;
 		ArrayList<String> Constraints = new ArrayList<String>();
 		String constraint1= null,constraint2=null;
@@ -231,27 +237,27 @@ public class SmartNode {
 		/**
 		 * @TODO Random power profile of flexible appliances
 		 */
-
+		
 		for(int i=0;i<2;i++)
 		{
 			int duration = Integer.parseInt(Constraints.get(i).split(" ")[0]);
 			int start = Integer.parseInt(Constraints.get(i).split(" ")[1]);
 			int end = Integer.parseInt(Constraints.get(i).split(" ")[2]);
-
+				
 			if(end<start)
 				end = end+24;
 			int startTime = randInt(start, end-duration);
 
-
+			
 			for(int j=0;j<duration;j++)
 			{
 				appliancePowerProfile[9+i][(start+j)%24]=1;
 			}
 		}
-
-
+		
+		
 		double[] TPCN= new double[24];
-
+		
 		for(int j=0;j<24;j++)
 		{
 			TPCN[j] = 0;
@@ -263,64 +269,73 @@ public class SmartNode {
 		//create TPCN_x file
 		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt",TPCN);		
 	}
-
+	
 	public static int randInt(int min, int max) {
 
-		// Usually this can be a field rather than a method variable
-		Random rand = new Random();
+	    // Usually this can be a field rather than a method variable
+	    Random rand = new Random();
 
-		// nextInt is normally exclusive of the top value,
-		// so add 1 to make it inclusive
-		int randomNum = rand.nextInt((max - min) + 1) + min;
+	    // nextInt is normally exclusive of the top value,
+	    // so add 1 to make it inclusive
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
 
-		return randomNum;
+	    return randomNum;
 	}
-	private static void runClient(final int currentNode){
-		(new Thread(){
+	private static void clientCode(int currentNode) throws Exception {
 
-			@Override
-			public void run()
-			{
-				try{
-					String[] ipAddressPortNumber;
-					String ipAddress;
-					Integer portNumber;
-					String input = "File Request";
-					for(int i =1;i<= noOfNodes ;i++)
-					{
-						if(i != currentNode)
-						{
-							ipAddressPortNumber = ipAddressList.get(i).split(" ");
-							ipAddress = ipAddressPortNumber[0];
-							portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-							Socket clientSocket = new Socket(ipAddress, portNumber);
-							DataOutputStream outToServer = new DataOutputStream(
-									clientSocket.getOutputStream());
-							BufferedReader inFromServer = 
-									new BufferedReader(new InputStreamReader(
-											clientSocket.getInputStream()));	
-							outToServer.writeBytes(input+"\n");
-							String fileInput = inFromServer.readLine();
-							System.out.println(fileInput);
-							writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
-							clientSocket.close();  
-						}
-					}
-					adjustPowerProfile(currentNode);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				} 
-			}
-		}).start();
-	}
-
-	private static void runServer(final int currentNode){(new Thread(){
-			
-		@Override 
-		public void run()
+		// TODO Auto-generated method stub
+		String input="";
+		String[] ipAddressPortNumber;
+		String ipAddress;
+		Integer portNumber;
+		Scanner scanner = null;
+		ArrayList<String> totalPowerConsumed = new ArrayList<String>();
+		System.out.println("\n Choose option: \n 1. Request File ");
+		scanner = new Scanner (System.in);
+		if(scanner.nextInt()==1)
+			input = "File Request";
+		for(int i =1;i<= noOfNodes ;i++)
 		{
-			try{
+			if(i != currentNode)
+			{
+				ipAddressPortNumber = ipAddressList.get(i).split(" ");
+				ipAddress = ipAddressPortNumber[0];
+				portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+				Socket clientSocket = new Socket(ipAddress, portNumber);
+				DataOutputStream outToServer = new DataOutputStream(
+		                clientSocket.getOutputStream());
+		        BufferedReader inFromServer = 
+		                new BufferedReader(new InputStreamReader(
+		                    clientSocket.getInputStream()));	
+		        outToServer.writeBytes(input+"\n");
+		        String fileInput = inFromServer.readLine();
+		        System.out.println(fileInput);
+		        writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
+		        clientSocket.close();  				        
+			}
+			else
+			{
+				String fileContents;
+                BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt"));
+            	  try {
+            	        StringBuilder sb = new StringBuilder();
+            	        String line = br.readLine();
+
+            	        while (line != null) {
+            	            sb.append(line);
+            	            sb.append(" ");
+            	            line = br.readLine();
+            	        }
+            	        fileContents = sb.toString();
+            	    } finally {
+            	        br.close();
+            	    }		
+			}
+		}
+	}
+
+	private static void serverCode(int currentNode) throws Exception {
+		// TODO Auto-generated method stub
 		String[] ipAddressPortNumber;
 		String ipAddress;
 		Integer portNumber;
@@ -347,29 +362,24 @@ public class SmartNode {
 			break;
 		}
 		while(true) {
-			Socket connectionSocket = welcomeSocket.accept();
-			System.out.println(connectionSocket.toString());
-			BufferedReader inFromClient = 
-					new BufferedReader(new InputStreamReader(
-							connectionSocket.getInputStream()));
-			DataOutputStream outToClient = 
-					new DataOutputStream(
-							connectionSocket.getOutputStream());
-			String clientMessage = inFromClient.readLine();
-			System.out.println(clientMessage);
-			if(clientMessage.equalsIgnoreCase("File Request"))
-			{
-				String fileContents;
-				fileContents = readFileIntoString(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt");
-				outToClient.writeBytes(fileContents+"\n");
-			}
-			//change to server/client depending on message
-		}
-		}catch (Exception e) {
-			e.printStackTrace();
-		} 
-		}
-	}).start();
+            Socket connectionSocket = welcomeSocket.accept();
+            System.out.println(connectionSocket.toString());
+            BufferedReader inFromClient = 
+                    new BufferedReader(new InputStreamReader(
+                        connectionSocket.getInputStream()));
+            DataOutputStream outToClient = 
+                    new DataOutputStream(
+                        connectionSocket.getOutputStream());
+            String clientMessage = inFromClient.readLine();
+            System.out.println(clientMessage);
+            if(clientMessage.equalsIgnoreCase("File Request"))
+            {
+            	String fileContents;
+            	fileContents = readFileIntoString(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt");
+            	outToClient.writeBytes(fileContents+"\n");
+            }
+          //change to server/client depending on message
+        }
 	}
 
 }
