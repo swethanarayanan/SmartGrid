@@ -2,9 +2,11 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,6 +14,9 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+//TPCS : Total Power Consumption of System
+//TPCN : Total Power Consumption of Node
+//TPC : Total Power Consumption
 
 public class SmartNode {
 
@@ -58,7 +63,7 @@ public class SmartNode {
 	}
 
 
-	private static void adjustPowerProfile(int currentNode) {
+	private static void adjustPowerProfile(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 		/**
 		 * @TODO Find PAR,Variance of TPCS = TPCN1 + TPCN2 + TPCN3
@@ -70,33 +75,78 @@ public class SmartNode {
 		 * @DOUBT How to automate multiple iterations across multiple nodes?
 		 */
 		//Maintain TPCS
-		String TPCS = "";
-		String TPCN1 = readFileIntoString("TPCN_1.txt");
-		String TPCN2 = readFileIntoString("TPCN_2.txt");
-		String TPCN3 = readFileIntoString("TPCN_3.txt");
-		
-		String[] TPCN1_24Hour = TPCN1.split("");
-		String[] TPCN2_24Hour = TPCN2.split("");
-		String[] TPCN3_24Hour = TPCN3.split("");
+		double[] TPCS= new double[24];
+		double[] TPCN1 = readFileIntoDoubleArray("TPCN_1.txt");
+		double[] TPCN2 = readFileIntoDoubleArray("TPCN_2.txt");
+		double[] TPCN3 = readFileIntoDoubleArray("TPCN_3.txt");
 		
 		for(int i=0;i<24;i++)
-		{
-			int TPCN1ByHour = Integer.parseInt(TPCN1_24Hour[i]);
-			int TPCN2ByHour = Integer.parseInt(TPCN2_24Hour[i]);
-			int TPCN3ByHour = Integer.parseInt(TPCN3_24Hour[i]);
-			
-			int TPCNSByHour = TPCN1ByHour + TPCN2ByHour + TPCN3ByHour;
-			TPCS += String.valueOf(TPCNSByHour)+" ";
+		{			
+			TPCS[i] = TPCN1[i] + TPCN2[i] + TPCN3[i];
 		}
+		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt",TPCS);
 	}
 
-
-	private static String readFileIntoString(String fileName) {
+	private static String readFileIntoString(String filePath) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+				
+	  String fileContents="";
+	  BufferedReader br = new BufferedReader(new FileReader(filePath));
+  	  try {
+  	        StringBuilder sb = new StringBuilder();
+  	        String line = br.readLine();
+
+  	        while (line != null) {
+  	            sb.append(line);
+  	            sb.append(" ");
+  	            line = br.readLine();
+  	        }
+  	        fileContents = sb.toString();
+  	    } finally {
+  	        br.close();
+  	    }
+		return fileContents;
 	}
+	
+	private static double[] readFileIntoDoubleArray(String filePath) throws Exception {
+		// TODO Auto-generated method stub
+	
+		 double[] TPC= new double[24];
+		 int i =0;
+		  BufferedReader br = new BufferedReader(new FileReader(filePath));
+	  	  try {
+	  	        TPC[i] = Double.valueOf(br.readLine());
 
-
+	  	        while (i<24) {	  	           
+	  	        	TPC[i] = Double.valueOf(br.readLine());
+	  	            i++;
+	  	        };
+	  	    } finally {
+	  	        br.close();
+	  	    }
+			return TPC;
+		
+	}
+	private static void writeStringArrayToFile(String filePath,String fileInput) throws Exception 
+	{
+		String[] TPC = fileInput.split(" ");
+		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
+		for(int j=0;j<24;j++)
+		{
+			writer.println(TPC[j]);
+		}
+		writer.close();
+	}
+	private static void writeDoubleArrayToFile(String filePath,double TPC[]) throws Exception {
+		// TODO Auto-generated method stub
+		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
+		for(int j=0;j<24;j++)
+		{
+			writer.println(TPC[j]);
+		}
+		writer.close();
+	}
+	
 	private static void initializePowerData(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 
@@ -171,25 +221,20 @@ public class SmartNode {
 		}
 		
 		
-		double[] totalPowerConsumptionNode= new double[24];
+		double[] TPCN= new double[24];
 		
 		for(int j=0;j<24;j++)
 		{
-			totalPowerConsumptionNode[j] = 0;
+			TPCN[j] = 0;
 			for(int i=0 ; i< 11;i++)
 			{
-				totalPowerConsumptionNode[j]+= appliancePowerProfile[i][j] * AppliancePowerConsumption[i];
+				TPCN[j]+= appliancePowerProfile[i][j] * AppliancePowerConsumption[i];
 			}
 		}
-		//create TPCN_x
-		PrintWriter writer = new PrintWriter(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt", "UTF-8");
-		for(int j=0;j<24;j++)
-		{
-			writer.println(totalPowerConsumptionNode[j]);
-		}
-		writer.close();
+		//create TPCN_x file
+		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt",TPCN);		
 	}
-
+	
 	public static int randInt(int min, int max) {
 
 	    // Usually this can be a field rather than a method variable
@@ -230,13 +275,7 @@ public class SmartNode {
 		        outToServer.writeBytes(input+"\n");
 		        String fileInput = inFromServer.readLine();
 		        System.out.println(fileInput);
-		        String[] powerConsumedByHour = fileInput.split(" ");
-		        PrintWriter writer = new PrintWriter(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", "UTF-8");
-				for(int j=0;j<24;j++)
-				{
-					writer.println(powerConsumedByHour[j]);
-				}
-				writer.close();		        
+		        writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
 		        clientSocket.close();  				        
 			}
 			else
@@ -301,20 +340,7 @@ public class SmartNode {
             if(clientMessage.equalsIgnoreCase("File Request"))
             {
             	String fileContents;
-                BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt"));
-            	  try {
-            	        StringBuilder sb = new StringBuilder();
-            	        String line = br.readLine();
-
-            	        while (line != null) {
-            	            sb.append(line);
-            	            sb.append(" ");
-            	            line = br.readLine();
-            	        }
-            	        fileContents = sb.toString();
-            	    } finally {
-            	        br.close();
-            	    }
+            	fileContents = readFileIntoString(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt");
             	outToClient.writeBytes(fileContents+"\n");
             }
           //change to server/client depending on message
