@@ -43,22 +43,21 @@ public class SmartNode {
 			{
 				//Client
 				//Connect to Servers
-				ArrayList<String> totalPowerConsumed = clientCode(currentNode);	
-				adjustPowerProfile(totalPowerConsumed,currentNode);
+				clientCode(currentNode);	
+				adjustPowerProfile(currentNode);
 			}
 		}
 		finally {
 			if(scanner!=null)
 				scanner.close();
 		}
-		
+		//Send message to the other two nodes job done , randomly choose next client,,make itself a server
 		
 		
 	}
 
 
-	private static void adjustPowerProfile(
-			ArrayList<String> totalPowerConsumed, int currentNode) {
+	private static void adjustPowerProfile(int currentNode) {
 		// TODO Auto-generated method stub
 		/**
 		 * @TODO Find PAR,Variance of TPCS = TPCN1 + TPCN2 + TPCN3
@@ -69,7 +68,21 @@ public class SmartNode {
 		/**
 		 * @DOUBT How to automate multiple iterations across multiple nodes?
 		 */
+		//Maintain TPCS
+		String TPCN1 = readFileIntoString("TPCN_1.txt");
+		String TPCN2 = readFileIntoString("TPCN_2.txt");
+		String TPCN3 = readFileIntoString("TPCN_3.txt");
 		
+		String[] TPCN1ByHour = TPCN1.split("");
+		String[] TPCN2ByHour = TPCN1.split("");
+		String[] TPCN3ByHour = TPCN1.split("");
+		
+	}
+
+
+	private static String readFileIntoString(String fileName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
@@ -139,7 +152,7 @@ public class SmartNode {
 				totalPowerConsumptionNode[j]+= appliancePowerProfile[i][j] * AppliancePowerConsumption[i];
 			}
 		}
-		
+		//create TPCN_x
 		PrintWriter writer = new PrintWriter(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt", "UTF-8");
 		for(int j=0;j<24;j++)
 		{
@@ -149,7 +162,7 @@ public class SmartNode {
 	}
 
 
-	private static ArrayList<String> clientCode(int currentNode) throws Exception {
+	private static void clientCode(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 		String input="";
 		String[] ipAddressPortNumber;
@@ -177,7 +190,13 @@ public class SmartNode {
 		        outToServer.writeBytes(input+"\n");
 		        String fileInput = inFromServer.readLine();
 		        System.out.println(fileInput);
-		        totalPowerConsumed.add(fileInput);
+		        String[] powerConsumedByHour = fileInput.split(" ");
+		        PrintWriter writer = new PrintWriter(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", "UTF-8");
+				for(int j=0;j<24;j++)
+				{
+					writer.println(powerConsumedByHour[j]);
+				}
+				writer.close();		        
 		        clientSocket.close();  				        
 			}
 			else
@@ -196,11 +215,9 @@ public class SmartNode {
             	        fileContents = sb.toString();
             	    } finally {
             	        br.close();
-            	    }
-            	  totalPowerConsumed.add(fileContents);			
+            	    }		
 			}
 		}
-		return totalPowerConsumed;
 	}
 
 	private static void serverCode(int currentNode) throws Exception {
@@ -260,6 +277,7 @@ public class SmartNode {
             	    }
             	outToClient.writeBytes(fileContents+"\n");
             }
+          //change to server/client depending on message
         }
 	}
 
