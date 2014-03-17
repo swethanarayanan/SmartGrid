@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -129,6 +130,24 @@ public class SmartNode {
 		 * @TODO Random power profile of flexible appliances
 		 */
 		
+		for(int i=0;i<2;i++)
+		{
+			int duration = Integer.parseInt(Constraints.get(i).split(" ")[0]);
+			int start = Integer.parseInt(Constraints.get(i).split(" ")[1]);
+			int end = Integer.parseInt(Constraints.get(i).split(" ")[2]);
+				
+			if(end<start)
+				end = end+24;
+			int startTime = randInt(start, end-duration);
+
+			
+			for(int j=0;j<duration;j++)
+			{
+				appliancePowerProfile[9+i][(start+j)%24]=1;
+			}
+		}
+		
+		
 		double[] totalPowerConsumptionNode= new double[24];
 		
 		for(int j=0;j<24;j++)
@@ -148,7 +167,19 @@ public class SmartNode {
 		writer.close();
 	}
 
+	public static int randInt(int min, int max) {
 
+	    // Usually this can be a field rather than a method variable
+	    Random rand = new Random();
+
+	    // nextInt is normally exclusive of the top value,
+	    // so add 1 to make it inclusive
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
+	}
+
+	
 	private static ArrayList<String> clientCode(int currentNode) throws Exception {
 		// TODO Auto-generated method stub
 		String input="";
