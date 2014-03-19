@@ -189,7 +189,13 @@ public class SmartNode {
 	}
 
 
+<<<<<<< HEAD
+
+
+	private int getTotalIterations(int duration1, int start1, int end1) {
+=======
 	private static int getTotalIterations(int duration1, int start1, int end1) {
+>>>>>>> 12539f1889896ba804f9d3d8176cb9adc8485d4c
 		// TODO Auto-generated method stub
 
 		int iter1 = 0;
