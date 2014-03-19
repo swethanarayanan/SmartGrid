@@ -19,19 +19,19 @@ import java.util.Scanner;
 public class SmartNode {
 
 	//no of iterations = no of times I became a client
-	int noOfIterations = 0;
+	static int noOfIterations = 0;
 	/**
 	 * @TODO : maxNoOfIterations to be updated by Abhishek
 	 */
-	int maxNoOfIterations = 100;
-	int noOfNodes = 3;
-	HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
-	boolean clientModeEnabled= false;
-	String minTPCS;
-	int currentNode;
-	int objective;
+	static int maxNoOfIterations = 100;
+	static int noOfNodes = 3;
+	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
+	static boolean clientModeEnabled= false;
+	static String minTPCS;
+	static int currentNode;
+	static int objective;
 	
-	public void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
 		/**
 		 * @TODO Handle Exceptions
@@ -42,7 +42,6 @@ public class SmartNode {
 		Scanner scanner = new Scanner (System.in);
 		System.out.println("\n Choose node: \n 1. Node 1 \n 2. Node 2 \n 3. Node 3");
 		currentNode = scanner.nextInt();
-		scanner.close();
 		scanner = new Scanner (System.in);
 		System.out.println("\n Choose objective: \n 1. Minimum PAR \n 2. Minimum Variance");
 		objective = scanner.nextInt();
@@ -55,7 +54,7 @@ public class SmartNode {
 	}
 
 
-	private void adjustPowerProfile(int currentNode) throws Exception {
+	private static void adjustPowerProfile(int currentNode) throws Exception {
 
 		/**
 		 * @TODO Find PAR,Variance of TPCS = TPCN1 + TPCN2 + TPCN3
@@ -91,7 +90,7 @@ public class SmartNode {
 		 */
 	}
 
-	private double getVariance(double[] tPCS, double avg) {
+	private static double getVariance(double[] tPCS, double avg) {
 
 		double variance = 0;
 		for(int i=0;i<24;i++)
@@ -104,7 +103,7 @@ public class SmartNode {
 	}
 
 
-	private double getLargestValue(double[] tPCS) {
+	private static double getLargestValue(double[] tPCS) {
 
 		double largest = 0;
 		for(int i=0;i<24;i++)
@@ -116,7 +115,7 @@ public class SmartNode {
 	}
 
 
-	private double getAvgPCS(double[] TPCS) {
+	private static double getAvgPCS(double[] TPCS) {
 
 		double sum=0;
 		for (int i=0;i<24;i++)
@@ -129,7 +128,7 @@ public class SmartNode {
 	}
 
 
-	private String readFileIntoString(String filePath) throws Exception {
+	private static String readFileIntoString(String filePath) throws Exception {
 
 		String fileContents="";
 		BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -149,7 +148,7 @@ public class SmartNode {
 		return fileContents;
 	}
 
-	private double[] readFileIntoDoubleArray(String filePath) throws Exception {
+	private static double[] readFileIntoDoubleArray(String filePath) throws Exception {
 
 		double[] TPC= new double[24];
 		int i =0;
@@ -167,7 +166,7 @@ public class SmartNode {
 		return TPC;
 
 	}
-	private void writeStringArrayToFile(String filePath,String fileInput) throws Exception 
+	private static void writeStringArrayToFile(String filePath,String fileInput) throws Exception 
 	{
 		String[] TPC = fileInput.split(" ");
 		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
@@ -177,7 +176,7 @@ public class SmartNode {
 		}
 		writer.close();
 	}
-	private void writeDoubleArrayToFile(String filePath,double TPC[]) throws Exception {
+	private static void writeDoubleArrayToFile(String filePath,double TPC[]) throws Exception {
 
 		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
 		for(int j=0;j<24;j++)
@@ -187,7 +186,7 @@ public class SmartNode {
 		writer.close();
 	}
 
-	private void initializePowerData(int currentNode) throws Exception {
+	private static void initializePowerData(int currentNode) throws Exception {
 
 		//Data
 		//11 by 24 matrix
@@ -274,7 +273,7 @@ public class SmartNode {
 		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt",TPCN);		
 	}
 
-	public int randInt(int min, int max) {
+	public static int randInt(int min, int max) {
 
 		// Usually this can be a field rather than a method variable
 		Random rand = new Random();
@@ -285,19 +284,25 @@ public class SmartNode {
 
 		return randomNum;
 	}
-	private void runClient(final int currentNode){
+	private static void runClient(final int currentNode){
 		(new Thread(){
 
+			
 			int nextNode;
 			String[] ipAddressPortNumber;
 			String ipAddress;
 			Integer portNumber;
 			String messageToServer;
+			
+			
 			@Override
 			public void run()
 			{
+				System.out.println("Enter client");
+				while(true) {
+				
 				//or is it 'if client mode enabled'?
-				while(clientModeEnabled)
+				if(clientModeEnabled)
 				{
 					noOfIterations ++;
 					if(noOfIterations > maxNoOfIterations)
@@ -334,6 +339,8 @@ public class SmartNode {
 						}
 						adjustPowerProfile(currentNode);
 						//Find the next node to be client
+						//Round Robin ok?
+						
 						if(currentNode == noOfNodes)
 							nextNode = 1;
 						else
@@ -360,15 +367,19 @@ public class SmartNode {
 					} 
 				}
 			}
+			}
 		}).start();
 	}
 
-	private void runServer(final int currentNode){(new Thread(){
+	private static void runServer(final int currentNode){(new Thread(){
 
 		//Server is continuously running
 		@Override 
 		public void run()
 		{
+			System.out.println("Enter server");
+			while(true) {
+			
 			try{
 				String[] ipAddressPortNumber;
 				String ipAddress;
@@ -421,6 +432,7 @@ public class SmartNode {
 			}catch (Exception e) {
 				e.printStackTrace();
 			} 
+		}
 		}
 	}).start();
 	}
