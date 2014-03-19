@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Extract method &apos;private double[] calculateNodePowerConsumption(double[] AppliancePowerConsumption)&apos; from &apos;SmartNode.initializePowerData()&apos; to &apos;SmartNode&apos;&#x0D;&#x0A;- Original project: &apos;SmartGrid&apos;&#x0D;&#x0A;- Method name: &apos;calculateNodePowerConsumption&apos;&#x0D;&#x0A;- Destination type: &apos;SmartNode&apos;&#x0D;&#x0A;- Declared visibility: &apos;private&apos;" comments="false" description="Extract method &apos;calculateNodePowerConsumption&apos;" destination="0" exceptions="false" flags="786434" id="org.eclipse.jdt.ui.extract.method" input="/src&lt;{SmartNode.java" name="calculateNodePowerConsumption" replace="false" selection="9076 200" stamp="1395248262451" version="1.0" visibility="2"/>
+</session>
