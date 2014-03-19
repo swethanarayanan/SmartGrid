@@ -144,51 +144,46 @@ public class SmartNode {
 		for (int l = 0; l < selectedPowerProfile.length; l++) 
 		{
 			selectedPowerProfile[l] = appliancePowerProfile2[l].clone();
-		}
-		for(int l=0; l<24;l++)
-		{
-			selectedPowerProfile[9][l]=0;
-			selectedPowerProfile[10][l]=0;
-		}
-		for(int i=0;i<iter1;i++)
-		{
-			int [][] tempPowerProfile =appliancePowerProfile2.clone();
-			for (int l1 = 0; l1 < tempPowerProfile.length; l1++) 
+
+			for(int i=0;i<iter1;i++)
 			{
-				tempPowerProfile[l1] = appliancePowerProfile2[l1].clone();
-			}
-			for(int l=0; l<24;l++)
-			{
-				tempPowerProfile[9][l]=0;
-				tempPowerProfile[10][l]=0;
-			}
-			for(int k=0;k<duration1;k++)
-			{
-				tempPowerProfile[9][(start1+i+k)%24] = 1;
-			}
-			for(int j=0;j<iter2;j++)
-			{
-				for(int k1=0;k1<duration1;k1++)
-					tempPowerProfile[10][(start2+j+k1)%24] = 1;
-				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
-				for(int m=0;m<24;m++)
-				{			
-					TPCS[m] = tpcn[m] + TPCN2[m] + TPCN3[i];
-				}
-				double avg = getAvgPCS(TPCS);
-				if(getVariance(TPCS, avg)<variance)
+				int [][] tempPowerProfile =appliancePowerProfile2.clone();
+				for (int l1 = 0; l1 < tempPowerProfile.length; l1++) 
 				{
-					for (int n = 0; n < selectedPowerProfile.length; n++) 
-					{
-						selectedPowerProfile[n] = appliancePowerProfile2[n].clone();
+					tempPowerProfile[l1] = appliancePowerProfile2[l1].clone();
+				}
+				for(int k=0;k<duration1;k++)
+					tempPowerProfile[9][start1+i+k] = 1;
+				for(int j=0;j<iter2;j++)
+				{
+					for(int k=0;k<duration1;k++)
+						tempPowerProfile[10][start2+j+k] = 1;
+
+					double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
+
+					for(int m=0;m<24;m++)
+					{			
+						TPCS[m] = tpcn[m] + TPCN2[m] + TPCN3[i];
 					}
-					variance = getVariance(TPCS, avg);
+
+					double avg = getAvgPCS(TPCS);
+					if(getVariance(TPCS, avg)<variance)
+					{
+						for (int n = 0; n < selectedPowerProfile.length; n++) 
+						{
+							selectedPowerProfile[n] = appliancePowerProfile2[n].clone();
+						}
+
+						variance = getVariance(TPCS, avg);
+
+					}
+
+
 				}
 			}
 		}
+
 	}
-
-
 
 
 	private int getTotalIterations(int duration1, int start1, int end1) {

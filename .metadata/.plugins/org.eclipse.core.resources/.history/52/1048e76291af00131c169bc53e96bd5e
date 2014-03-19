@@ -149,6 +149,7 @@ public class SmartNode {
 		{
 			selectedPowerProfile[9][l]=0;
 			selectedPowerProfile[10][l]=0;
+			
 		}
 		for(int i=0;i<iter1;i++)
 		{
@@ -157,19 +158,12 @@ public class SmartNode {
 			{
 				tempPowerProfile[l1] = appliancePowerProfile2[l1].clone();
 			}
-			for(int l=0; l<24;l++)
-			{
-				tempPowerProfile[9][l]=0;
-				tempPowerProfile[10][l]=0;
-			}
 			for(int k=0;k<duration1;k++)
-			{
-				tempPowerProfile[9][(start1+i+k)%24] = 1;
-			}
+				tempPowerProfile[9][start1+i+k] = 1;
 			for(int j=0;j<iter2;j++)
 			{
-				for(int k1=0;k1<duration1;k1++)
-					tempPowerProfile[10][(start2+j+k1)%24] = 1;
+				for(int k=0;k<duration1;k++)
+					tempPowerProfile[10][start2+j+k] = 1;
 				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
 				for(int m=0;m<24;m++)
 				{			
