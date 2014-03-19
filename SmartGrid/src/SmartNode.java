@@ -180,12 +180,22 @@ public class SmartNode {
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
 					{
-						selectedPowerProfile[n] = appliancePowerProfile2[n].clone();
+						selectedPowerProfile[n] = tempPowerProfile[n].clone();
 					}
 					variance = getVariance(TPCS, avg);
 				}
 			}
+			
 		}
+			for(int k =0;k < 24;k++)
+			{
+				appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
+				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
+				
+			}
+			System.out.println(variance);
+			
+		
 	}
 
 
@@ -193,7 +203,7 @@ public class SmartNode {
 		// TODO Auto-generated method stub
 
 		int iter1 = 0;
-		if(start1>end1)
+		if(start1<end1)
 		{
 			iter1 = end1-start1-duration1+1;
 		}
