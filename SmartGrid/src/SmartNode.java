@@ -168,6 +168,10 @@ public class SmartNode {
 			}
 			for(int j=0;j<iter2;j++)
 			{
+				for(int l=0; l<24;l++)
+				{
+					tempPowerProfile[10][l]=0;
+				}
 				for(int k1=0;k1<duration1;k1++)
 					tempPowerProfile[10][(start2+j+k1)%24] = 1;
 				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
@@ -258,6 +262,10 @@ public class SmartNode {
 			}
 			for(int j=0;j<iter2;j++)
 			{
+				for(int l=0; l<24;l++)
+				{
+					tempPowerProfile[10][l]=0;
+				}
 				for(int k1=0;k1<duration1;k1++)
 					tempPowerProfile[10][(start2+j+k1)%24] = 1;
 				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
