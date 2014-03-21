@@ -257,25 +257,27 @@ public class SmartNode {
 					TPCS[m] = tpcn[m] + TPCN2[m] + TPCN3[i];
 				}
 				double avg = getAvgPCS(TPCS);
-				if(getLargestValue(TPCS)<peak)
+				double largestValue = getLargestValue(TPCS);
+				if(largestValue<peak)
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
 					{
 						selectedPowerProfile[n] = tempPowerProfile[n].clone();
 					}
 					peak = getLargestValue(TPCS);
+					
 				}
 			}
 			
 		}
-			for(int k =0;k < 24;k++)
-			{
-				appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
-				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
-				
-			}
-			System.out.println(peak);
-		
+		for(int k =0;k < 24;k++)
+		{
+			appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
+			appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
+			
+		}
+		System.out.println(peak);
+		System.out.println(TPCS);
 	}
 
 
