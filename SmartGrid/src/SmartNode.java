@@ -194,7 +194,87 @@ public class SmartNode {
 				
 			}
 			System.out.println(variance);
+		
+	}
+
+	
+	private static void minimizePAR(int[][] appliancePowerProfile2, double[] tPCS) throws Exception {
+		// TODO Auto-generated method stub
+
+		int duration1 = Integer.parseInt(Constraints.get(0).split(" ")[0]);
+		int start1 = Integer.parseInt(Constraints.get(0).split(" ")[1]);
+		int end1 = Integer.parseInt(Constraints.get(0).split(" ")[2]);
+
+		int duration2 = Integer.parseInt(Constraints.get(1).split(" ")[0]);
+		int start2 = Integer.parseInt(Constraints.get(1).split(" ")[1]);
+		int end2 = Integer.parseInt(Constraints.get(1).split(" ")[2]);
+
+		int iter1 = getTotalIterations(duration1,start1,end1);
+		int iter2 = getTotalIterations(duration2,start2,end2);
+		int total_iterations = iter1*iter2;
+
+		double[] TPCS= new double[24];
+		double[] TPCN1 = readFileIntoDoubleArray("TPCN_1.txt");
+		double[] TPCN2 = readFileIntoDoubleArray("TPCN_2.txt");
+		double[] TPCN3 = readFileIntoDoubleArray("TPCN_3.txt");
+
+		double peak = Double.MAX_VALUE;
+		//Extensive search
+
+		int [][] selectedPowerProfile =appliancePowerProfile2.clone();
+		for (int l = 0; l < selectedPowerProfile.length; l++) 
+		{
+			selectedPowerProfile[l] = appliancePowerProfile2[l].clone();
+		}
+		for(int l=0; l<24;l++)
+		{
+			selectedPowerProfile[9][l]=0;
+			selectedPowerProfile[10][l]=0;
+		}
+		for(int i=0;i<iter1;i++)
+		{
+			int [][] tempPowerProfile =appliancePowerProfile2.clone();
+			for (int l1 = 0; l1 < tempPowerProfile.length; l1++) 
+			{
+				tempPowerProfile[l1] = appliancePowerProfile2[l1].clone();
+			}
+			for(int l=0; l<24;l++)
+			{
+				tempPowerProfile[9][l]=0;
+				tempPowerProfile[10][l]=0;
+			}
+			for(int k=0;k<duration1;k++)
+			{
+				tempPowerProfile[9][(start1+i+k)%24] = 1;
+			}
+			for(int j=0;j<iter2;j++)
+			{
+				for(int k1=0;k1<duration1;k1++)
+					tempPowerProfile[10][(start2+j+k1)%24] = 1;
+				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
+				for(int m=0;m<24;m++)
+				{			
+					TPCS[m] = tpcn[m] + TPCN2[m] + TPCN3[i];
+				}
+				double avg = getAvgPCS(TPCS);
+				if(getLargestValue(TPCS)<peak)
+				{
+					for (int n = 0; n < selectedPowerProfile.length; n++) 
+					{
+						selectedPowerProfile[n] = tempPowerProfile[n].clone();
+					}
+					peak = getLargestValue(TPCS);
+				}
+			}
 			
+		}
+			for(int k =0;k < 24;k++)
+			{
+				appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
+				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
+				
+			}
+			System.out.println(peak);
 		
 	}
 
@@ -217,13 +297,6 @@ public class SmartNode {
 
 		return iter1;		
 	}
-
-
-	private static void minimizePAR(int[][] appliancePowerProfile2, double[] tPCS) {
-		// TODO Auto-generated method stub
-
-	}
-
 
 	private static double getVariance(double[] tPCS, double avg) {
 
