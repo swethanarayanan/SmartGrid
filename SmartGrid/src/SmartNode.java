@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
@@ -17,18 +16,18 @@ import java.util.Scanner;
 //TPCN : Total Power Consumption of Node
 //TPC : Total Power Consumption
 
-public class SmartNode {
+public class SmartNode{
 
 	//no of iterations = no of times I became a client
 	static int noOfIterations = 0;
 	/**
 	 * @TODO : maxNoOfIterations to be updated by Abhishek
 	 */
-	static int maxNoOfIterations = 100;
+	static int maxNoOfIterations = 3;
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
 	static boolean clientModeEnabled= false;
-	static String minTPCS;
+	static String minTPCS="";
 	static int currentNode;
 	static int objective;
 
@@ -67,7 +66,7 @@ public class SmartNode {
 		if(currentNode == 1)
 			clientModeEnabled= true;
 		runServer(currentNode);
-		runClient(currentNode);	
+		//runClient(currentNode);	
 	}
 
 
@@ -132,6 +131,7 @@ public class SmartNode {
 		int iter2 = getTotalIterations(duration2,start2,end2);
 		int total_iterations = iter1*iter2;
 
+		double[] bestTPCS= new double[24];
 		double[] TPCS= new double[24];
 		double[] TPCN1 = readFileIntoDoubleArray("TPCN_1.txt");
 		double[] TPCN2 = readFileIntoDoubleArray("TPCN_2.txt");
@@ -172,7 +172,7 @@ public class SmartNode {
 				{
 					tempPowerProfile[10][l]=0;
 				}
-				for(int k1=0;k1<duration1;k1++)
+				for(int k1=0;k1<duration2;k1++)
 					tempPowerProfile[10][(start2+j+k1)%24] = 1;
 				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
 				for(int m=0;m<24;m++)
@@ -187,6 +187,7 @@ public class SmartNode {
 						selectedPowerProfile[n] = tempPowerProfile[n].clone();
 					}
 					variance = getVariance(TPCS, avg);
+					bestTPCS  = TPCS.clone();
 				}
 			}
 
@@ -195,18 +196,35 @@ public class SmartNode {
 		double [] oldTpcs = getTPCSfromString(minTPCS);
 		double oldVar = getVariance(oldTpcs,getAvgPCS(oldTpcs));
 
-		if(variance < oldVar)
+		if(!minTPCS.isEmpty())
+		{
+			oldTpcs = getTPCSfromString(minTPCS);
+			oldVar = getLargestValue(oldTpcs);
+
+			if(variance < oldVar)
+			{
+				for(int k =0;k < 24;k++)
+				{
+					appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
+					appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
+
+				}
+
+				minTPCS = getStringFromTPCS(bestTPCS);
+				
+			}
+		}
+		else
 		{
 			for(int k =0;k < 24;k++)
 			{
 				appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
 				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
-
 			}
 
-			oldVar = variance;
+			minTPCS = getStringFromTPCS(bestTPCS);
 		}
-		System.out.println(variance);
+
 
 	}
 
@@ -226,6 +244,7 @@ public class SmartNode {
 		int iter2 = getTotalIterations(duration2,start2,end2);
 		int total_iterations = iter1*iter2;
 
+		double[] bestTPCS= new double[24];
 		double[] TPCS= new double[24];
 		double[] TPCN1 = readFileIntoDoubleArray("TPCN_1.txt");
 		double[] TPCN2 = readFileIntoDoubleArray("TPCN_2.txt");
@@ -266,7 +285,7 @@ public class SmartNode {
 				{
 					tempPowerProfile[10][l]=0;
 				}
-				for(int k1=0;k1<duration1;k1++)
+				for(int k1=0;k1<duration2;k1++)
 					tempPowerProfile[10][(start2+j+k1)%24] = 1;
 				double [] tpcn = calculateNodePowerConsumption(AppliancePowerConsumption, tempPowerProfile);
 				for(int m=0;m<24;m++)
@@ -282,7 +301,7 @@ public class SmartNode {
 						selectedPowerProfile[n] = tempPowerProfile[n].clone();
 					}
 					peak = getLargestValue(TPCS);
-					
+					bestTPCS  = TPCS.clone();
 				}
 			}
 
@@ -291,30 +310,51 @@ public class SmartNode {
 		{
 			appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
 			appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
-			
+
 		}
-		System.out.println(peak);
-		System.out.println(TPCS);
+		double [] oldTpcs;
+		double oldPeak ;
+		if(!minTPCS.isEmpty())
+		{
+			oldTpcs = getTPCSfromString(minTPCS);
+			oldPeak = getLargestValue(oldTpcs);
 
-		double [] oldTpcs = getTPCSfromString(minTPCS);
+			if(peak < oldPeak)
+			{
+				for(int k =0;k < 24;k++)
+				{
+					appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
+					appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
 
-		double oldPeak = getLargestValue(oldTpcs);
+				}
 
-		if(peak < oldPeak)
+				minTPCS = getStringFromTPCS(bestTPCS);
+			}
+		}
+		else
 		{
 			for(int k =0;k < 24;k++)
 			{
 				appliancePowerProfile[9][k] = selectedPowerProfile[9][k];
 				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
-
 			}
 
-			oldPeak = peak;
+			minTPCS = getStringFromTPCS(bestTPCS);
 		}
-		System.out.println(oldPeak);
+
 
 	}
 
+	private static String getStringFromTPCS(double[] TPCS) {
+
+		String bestTPCS = "";
+		for(int i=0;i<24;i++)
+		{
+			bestTPCS += String.valueOf(TPCS[i])+" ";
+		}
+
+		return bestTPCS;
+	}
 
 	private static double[] getTPCSfromString(String minTPCS2) {
 
@@ -535,92 +575,8 @@ public class SmartNode {
 
 		return randomNum;
 	}
-	private static void runClient(final int currentNode){
-		(new Thread(){
 
 
-			int nextNode;
-			String[] ipAddressPortNumber;
-			String ipAddress;
-			Integer portNumber;
-			String messageToServer;
-
-
-			@Override
-			public void run()
-			{
-				System.out.println("Enter client");
-				while(true) {
-
-					//or is it 'if client mode enabled'?
-					if(clientModeEnabled)
-					{
-						noOfIterations ++;
-						if(noOfIterations > maxNoOfIterations)
-						{
-							System.out.println("Smart Grid Application Complete");
-							/**
-							 * @TODO Plot final TPCS,TPCN1,TPCN2,TPCN3
-							 */
-							System.exit(0);
-						}
-						//Request for file and receive file from other two nodes
-						try
-						{
-							messageToServer = "TPCN_Request";
-							for(int i =1;i<= noOfNodes ;i++)
-							{
-								if(i != currentNode)
-								{
-									ipAddressPortNumber = ipAddressList.get(i).split(" ");
-									ipAddress = ipAddressPortNumber[0];
-									portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-									Socket clientSocket = new Socket(ipAddress, portNumber);
-									DataOutputStream outToServer = new DataOutputStream(
-											clientSocket.getOutputStream());
-									BufferedReader inFromServer = 
-											new BufferedReader(new InputStreamReader(
-													clientSocket.getInputStream()));	
-									outToServer.writeBytes(messageToServer+"\n");
-									String fileInput = inFromServer.readLine();
-									System.out.println(fileInput);
-									writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
-									clientSocket.close();  
-								}
-							}
-							adjustPowerProfile(currentNode);
-							//Find the next node to be client
-							//Round Robin ok?
-
-							if(currentNode == noOfNodes)
-								nextNode = 1;
-							else
-								nextNode = currentNode + 1;
-
-							clientModeEnabled = false;
-
-
-							//Send message to next node to change to client mode
-							messageToServer = "Change_To_Client"+" "+minTPCS;
-							ipAddressPortNumber = ipAddressList.get(nextNode).split(" ");
-							ipAddress = ipAddressPortNumber[0];
-							portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-							Socket clientSocket = new Socket(ipAddress, portNumber);
-							DataOutputStream outToServer = new DataOutputStream(
-									clientSocket.getOutputStream());
-							BufferedReader inFromServer = 
-									new BufferedReader(new InputStreamReader(
-											clientSocket.getInputStream()));	
-							outToServer.writeBytes(messageToServer+"\n");
-						}
-						catch (Exception e) {
-							e.printStackTrace();
-						} 
-					}
-				}
-			}
-		}).start();
-	}
 
 	private static void runServer(final int currentNode){(new Thread(){
 
@@ -628,61 +584,154 @@ public class SmartNode {
 		@Override 
 		public void run()
 		{
-			System.out.println("Enter server");
-			while(true) {
 
-				try{
-					String[] ipAddressPortNumber;
-					String ipAddress;
-					Integer portNumber;
-					ServerSocket welcomeSocket=new ServerSocket();
-					switch(currentNode)
+			System.out.println("Entered server");
+
+			String[] ipAddressPortNumber;
+			String ipAddress;
+			Integer portNumber;
+			ServerSocket welcomeSocket= null;
+			try
+			{
+				welcomeSocket =new ServerSocket(); ;
+				switch(currentNode)
+				{
+				case 1 :
+					ipAddressPortNumber = ipAddressList.get(1).split(" ");
+					ipAddress = ipAddressPortNumber[0];
+					portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+					welcomeSocket = new ServerSocket(portNumber);
+					break;
+				case 2 :
+					ipAddressPortNumber = ipAddressList.get(2).split(" ");
+					ipAddress = ipAddressPortNumber[0];
+					portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+					welcomeSocket = new ServerSocket(portNumber);
+					break;
+				case 3:
+					ipAddressPortNumber = ipAddressList.get(3).split(" ");
+					ipAddress = ipAddressPortNumber[0];
+					portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+					welcomeSocket = new ServerSocket(portNumber);
+					break;
+				}
+			}catch(Exception e)
+			{
+
+			}
+			while(true) {			
+				if(clientModeEnabled)
+				{
+					new Thread(){
+
+						int nextNode;
+						String[] ipAddressPortNumber;
+						String ipAddress;
+						Integer portNumber;
+						String messageToServer;
+
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+
+							System.out.println("Entered client");
+							noOfIterations++;
+							if(noOfIterations > maxNoOfIterations)
+							{
+								System.out.println("Smart Grid Application Complete");
+								/**
+								 * @TODO Plot final TPCS,TPCN1,TPCN2,TPCN3
+								 */
+								System.out.println(noOfIterations);
+								System.out.println(minTPCS);
+								System.exit(0);
+							}
+							//Request for file and receive file from other two nodes
+							try
+							{
+								messageToServer = "TPCN_Request";
+								for(int i =1;i<= noOfNodes ;i++)
+								{
+									if(i != currentNode)
+									{
+										ipAddressPortNumber = ipAddressList.get(i).split(" ");
+										ipAddress = ipAddressPortNumber[0];
+										portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+										Socket clientSocket = new Socket(ipAddress, portNumber);
+										DataOutputStream outToServer = new DataOutputStream(
+												clientSocket.getOutputStream());
+										BufferedReader inFromServer = 
+												new BufferedReader(new InputStreamReader(
+														clientSocket.getInputStream()));	
+										outToServer.writeBytes(messageToServer+"\n");
+										String fileInput = inFromServer.readLine();
+										System.out.println(fileInput);
+										writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
+										clientSocket.close();  
+									}
+								}
+								adjustPowerProfile(currentNode);
+								//Find the next node to be client
+								//Round Robin ok?
+
+								if(currentNode == noOfNodes)
+									nextNode = 1;
+								else
+									nextNode = currentNode + 1;
+
+								//Send message to next node to change to client mode
+								messageToServer = "Change_To_Client"+":"+minTPCS;
+								String minTPCS = messageToServer.split(":")[1];
+								ipAddressPortNumber = ipAddressList.get(nextNode).split(" ");
+								ipAddress = ipAddressPortNumber[0];
+								portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+								Socket clientSocket = new Socket(ipAddress, portNumber);
+								DataOutputStream outToServer = new DataOutputStream(
+										clientSocket.getOutputStream());
+								BufferedReader inFromServer = 
+										new BufferedReader(new InputStreamReader(
+												clientSocket.getInputStream()));	
+								outToServer.writeBytes(messageToServer+"\n");
+								clientSocket.close();
+							}
+							catch(Exception e)
+							{
+
+							}
+						}
+
+					}.start();
+					clientModeEnabled = false;
+				}
+				try
+				{
+					Socket connectionSocket = welcomeSocket.accept();
+					System.out.println(connectionSocket.toString());
+					BufferedReader inFromClient = 
+							new BufferedReader(new InputStreamReader(
+									connectionSocket.getInputStream()));
+					DataOutputStream outToClient = 
+							new DataOutputStream(
+									connectionSocket.getOutputStream());
+					String clientMessage = inFromClient.readLine();
+					System.out.println(clientMessage);
+					if(clientMessage.equalsIgnoreCase("TPCN_Request"))
 					{
-					case 1 :
-						ipAddressPortNumber = ipAddressList.get(1).split(" ");
-						ipAddress = ipAddressPortNumber[0];
-						portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-						welcomeSocket = new ServerSocket(portNumber);
-						break;
-					case 2 :
-						ipAddressPortNumber = ipAddressList.get(2).split(" ");
-						ipAddress = ipAddressPortNumber[0];
-						portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-						welcomeSocket = new ServerSocket(portNumber);
-						break;
-					case 3:
-						ipAddressPortNumber = ipAddressList.get(3).split(" ");
-						ipAddress = ipAddressPortNumber[0];
-						portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-						welcomeSocket = new ServerSocket(portNumber);
-						break;
+						String fileContents;
+						fileContents = readFileIntoString(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt");
+						outToClient.writeBytes(fileContents+"\n");
 					}
-					while(true) {
-						Socket connectionSocket = welcomeSocket.accept();
-						System.out.println(connectionSocket.toString());
-						BufferedReader inFromClient = 
-								new BufferedReader(new InputStreamReader(
-										connectionSocket.getInputStream()));
-						DataOutputStream outToClient = 
-								new DataOutputStream(
-										connectionSocket.getOutputStream());
-						String clientMessage = inFromClient.readLine();
-						System.out.println(clientMessage);
-						if(clientMessage.equalsIgnoreCase("TPCN_Request"))
-						{
-							String fileContents;
-							fileContents = readFileIntoString(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt");
-							outToClient.writeBytes(fileContents+"\n");
-						}
-						if(clientMessage.startsWith("Change_To_Client"))
-						{
-							minTPCS = clientMessage.split(" ")[1];
-							clientModeEnabled = true;
-						}
+					if(clientMessage.startsWith("Change_To_Client"))
+					{
+						minTPCS = clientMessage.split(":")[1];
+						clientModeEnabled = true;
 					}
-				}catch (Exception e) {
-					e.printStackTrace();
-				} 
+				}
+				catch(Exception e)
+				{
+
+				}
+
 			}
 		}
 	}).start();
