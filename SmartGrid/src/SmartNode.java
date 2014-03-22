@@ -39,6 +39,7 @@ public class SmartNode{
 	static int objective;
 	static double bestPeak,bestVar;
 	static ArrayList<String> Constraints; 
+	static int node1finished, node2finished, node3finished = 0;
 	static double[] appliancePowerConsumption = null ;
 	static int[][] appliancePowerProfile = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -209,7 +210,7 @@ public class SmartNode{
 				}
 				bestTPCS = getStringFromTPCS(currentBestTPCS);
 				bestVar =  variance;
-				
+
 				if(currentNode==1)
 					writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 				else if(currentNode == 2)
@@ -321,16 +322,16 @@ public class SmartNode{
 
 				double largestValue = getLargestValue(TPCS);
 				System.out.println("largestValue is"+ largestValue);
-			
+
 				for(int m=0;m<24;m++)
 				{			
 					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
-					
+
 				}
 				double avg = getAvgPCS(TPCS);
 				largestValue = getLargestValue(TPCS);
 				System.out.println("largestValue is"+ largestValue);
-				
+
 				if(largestValue<peak)
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
@@ -346,8 +347,8 @@ public class SmartNode{
 			}
 
 		}
-		
-		
+
+
 		if(!bestTPCS.isEmpty())
 		{
 
@@ -362,7 +363,7 @@ public class SmartNode{
 				}
 				bestTPCS = getStringFromTPCS(currentBestTPCS);
 				bestPeak = peak;
-				
+
 				if(currentNode==1)
 					writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 				else if(currentNode == 2)
@@ -382,7 +383,7 @@ public class SmartNode{
 			}
 			bestTPCS = getStringFromTPCS(currentBestTPCS);
 			bestPeak = peak;
-			
+
 			if(currentNode==1)
 				writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 			else if(currentNode == 2)
@@ -393,7 +394,7 @@ public class SmartNode{
 			writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt", currentBestTPCS);
 
 		}
-		
+
 
 	}
 
@@ -629,14 +630,14 @@ public class SmartNode{
 
 		return randomNum;
 	}
-	
+
 	public static void createChart(double[] tPCS)
 	{
 		double[][] model = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};     // Create data array
 
 		for(int i=0;i<24;i++)
 			model[0][i] = tPCS[i];
-		
+
 		double[] columns = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};  // Create x-axis values
 
 		String[] rows = {"Power"};          // Create data set title
@@ -665,6 +666,69 @@ public class SmartNode{
 			e.printStackTrace();
 		}
 	}
+	
+	private static int getNextNode()
+	{
+
+		if(currentNode == 1)
+		{
+			if(node2finished == 0 &&node3finished ==1)
+			{
+				return 2;
+			}
+			else if(node2finished == 1 &&node3finished ==0)
+			{
+				return 3;
+			}
+			else if(node2finished == 1 &&node3finished ==1)
+			{
+				node1finished = 1;
+				node2finished = 0;
+				node3finished = 0;
+				return randInt(2, 3);
+			}
+		}
+		else if(currentNode==2)
+		{
+			if(node1finished == 0 &&node3finished ==1)
+			{
+				return 1;
+			}
+			else if(node1finished == 1 &&node3finished ==0)
+			{
+				return 3;
+			}
+			else if(node1finished == 1 &&node3finished ==1)
+			{
+				node1finished = 0;
+				node2finished = 1;
+				node3finished = 0;
+				if(randInt(1,2)==1)
+					return 1;
+				else return 3;			
+			}
+		}
+		else if(currentNode==3)
+		{
+			if(node1finished == 0 &&node2finished ==1)
+			{
+				return 1;
+			}
+			else if(node1finished == 1 &&node2finished ==0)
+			{
+				return 2;
+			}
+			else if(node1finished == 1 &&node2finished ==1)
+			{
+				node1finished = 0;
+				node2finished = 0;
+				node3finished = 1;
+				return randInt(1,2);			
+			}
+		}
+		return 0;
+	}
+
 
 
 	private static void runServer(final int currentNode){(new Thread(){
@@ -765,10 +829,15 @@ public class SmartNode{
 								//Find the next node to be client
 								//Round Robin ok?
 
-								if(currentNode == noOfNodes)
+								/*if(currentNode == noOfNodes)
 									nextNode = 1;
 								else
-									nextNode = currentNode + 1;
+									nextNode = currentNode + 1;*/
+								nextNode = getNextNode();
+								if(nextNode==0)
+								{
+									System.out.println("Ooops!");
+								}
 
 								//Send message to next node to change to client mode
 								messageToServer = "Change_To_Client"+":"+bestTPCS;
@@ -791,6 +860,7 @@ public class SmartNode{
 							}
 						}
 
+						
 					}.start();
 					clientModeEnabled = false;
 				}
