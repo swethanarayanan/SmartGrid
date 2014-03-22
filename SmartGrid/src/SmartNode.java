@@ -23,7 +23,7 @@ public class SmartNode{
 	/**
 	 * @TODO : maxNoOfIterations to be updated by Abhishek
 	 */
-	static int maxNoOfIterations = 100;
+	static int maxNoOfIterations = 1000;
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
 	static boolean clientModeEnabled= false;
@@ -312,12 +312,18 @@ public class SmartNode{
 				else if(currentNode == 3)
 					TPCN3 = TPCN.clone();
 
+				double largestValue = getLargestValue(TPCS);
+				System.out.println("largestValue is"+ largestValue);
+			
 				for(int m=0;m<24;m++)
 				{			
-					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[i];
+					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
+					
 				}
 				double avg = getAvgPCS(TPCS);
-				double largestValue = getLargestValue(TPCS);
+				largestValue = getLargestValue(TPCS);
+				System.out.println("largestValue is"+ largestValue);
+				
 				if(largestValue<peak)
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
@@ -333,6 +339,8 @@ public class SmartNode{
 			}
 
 		}
+		
+		
 		if(!bestTPCS.isEmpty())
 		{
 
@@ -680,6 +688,7 @@ public class SmartNode{
 								 * @TODO Plot final TPCS,TPCN1,TPCN2,TPCN3
 								 */
 								System.out.println(noOfIterations);
+								//print appliance power profile
 								System.out.println(bestPeak);
 								System.out.println(bestVar);
 								System.exit(0);
@@ -703,7 +712,7 @@ public class SmartNode{
 														clientSocket.getInputStream()));	
 										outToServer.writeBytes(messageToServer+"\n");
 										String fileInput = inFromServer.readLine();
-										System.out.println(fileInput);
+										//System.out.println(fileInput);
 										writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
 										clientSocket.close();  
 									}
@@ -744,7 +753,7 @@ public class SmartNode{
 				try
 				{
 					Socket connectionSocket = welcomeSocket.accept();
-					System.out.println(connectionSocket.toString());
+					//System.out.println(connectionSocket.toString());
 					BufferedReader inFromClient = 
 							new BufferedReader(new InputStreamReader(
 									connectionSocket.getInputStream()));
