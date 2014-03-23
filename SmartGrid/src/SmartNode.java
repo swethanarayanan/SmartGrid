@@ -980,6 +980,7 @@ public class SmartNode{
 							if(noOfIterations > maxNoOfIterations)
 							{
 								System.out.println("Smart Grid Application Complete");
+								printResult();
 								
 								if(objective == 1)
 								{
@@ -1054,6 +1055,83 @@ public class SmartNode{
 									adjustPowerProfile();
 								}
 								printExceptionMessage();
+							}
+						}
+
+						private void printResult() {
+							// TODO Auto-generated method stub
+							double[] TPCS  = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCS.txt");
+							double[] TPCN1 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_1.txt");
+							double[] TPCN2 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_2.txt");
+							double[] TPCN3 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_3.txt");
+							
+							
+							System.out.println("Chosen power profile of appliances");
+							for(int i=0;i<2;i++)
+							{
+								for(int j=0;j<24;j++)
+								{
+									System.out.print(Double.toString(appliancePowerProfile[9+i][j]));
+								}
+							}
+							
+							System.out.println("Total power consumption (TPCS) ");
+							for(int i=0;i<24;i++)
+							{
+								System.out.print(Double.toString(TPCS[i]));
+							}
+							
+							System.out.println("Total power consumption of Node 1 (TPCN1); ");
+							for(int i=0;i<24;i++)
+							{
+								System.out.print(Double.toString(TPCN1[i]));
+							}
+							
+							System.out.println("Total power consumption of Node 2 (TPCN2); ");
+							for(int i=0;i<24;i++)
+							{
+								System.out.print(Double.toString(TPCN2[i]));
+							}
+							
+							System.out.println("Total power consumption of Node 3 (TPCN3); ");
+							for(int i=0;i<24;i++)
+							{
+								System.out.print(Double.toString(TPCN3[i]));
+							}
+							
+							if(objective==1)
+							{
+								double TPAR = getLargestValue(TPCS)/getAvgPCS(TPCS);	
+								System.out.println("Minimum PAR of system is = " + Double.toString(TPAR));
+								
+								double PAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+								System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1));
+								
+								double PAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+								System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2));
+								
+								double PAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+								System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3));
+								
+								System.out.println("Number of iterations = " + noOfIterations);
+								
+							}
+							
+							else if(objective==2)
+							{
+								double TVAR = getVariance(TPCS, getAvgPCS(TPCS));	
+								System.out.println("Minimum Variance of system is = " + Double.toString(TVAR));
+								
+								double VAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+								System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1));
+								
+								double VAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+								System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2));
+								
+								double VAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+								System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3));
+								
+								System.out.println("Number of iterations = " + noOfIterations);
 							}
 						}
 
