@@ -60,7 +60,7 @@ public class SmartNode{
 	static String FILE_ERR_MSG= "Error in File";
 	static Boolean stop = false;
 	static int converging_iterations = 0;
-	static int MAX_CONVERGING_ITERATIONS = 10;
+	static int MAX_CONVERGING_ITERATIONS = 1000;
 	static double[] appliancePowerConsumption = null ;
 	static int[][] appliancePowerProfile = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
