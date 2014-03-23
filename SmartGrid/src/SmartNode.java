@@ -44,7 +44,7 @@ public class SmartNode{
 	// Node 3 has 63 possible flexible appliance power profile configurations
 	//maximum no of times a node becomes a client : calculated to be 63 * 72 * 63 = 285768 
 
-	static int maxNoOfIterations = 40000; 
+	static int maxNoOfIterations = 100; 
 	//No of nodes in this prototype system has been fixed to be 3
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
@@ -206,7 +206,13 @@ public class SmartNode{
 
 					for(int m=0;m<24;m++)
 					{			
-						TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
+						TPCS[m] = 0;
+						if(m<TPCN1.length)
+						TPCS[m] += TPCN1[m] ;
+						if(m<TPCN2.length)
+						TPCS[m] +=	TPCN2[m] ;
+						if(m<TPCN3.length)
+						TPCS[m] +=	TPCN3[m] ;
 					}
 					double avg = getAvgPCS(TPCS);
 					double currentvar = getVariance(TPCS, avg);
@@ -380,8 +386,13 @@ public class SmartNode{
 
 					for(int m=0;m<24;m++)
 					{			
-						TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
-
+						TPCS[m] = 0;
+						if(m<TPCN1.length)
+						TPCS[m] += TPCN1[m] ;
+						if(m<TPCN2.length)
+						TPCS[m] +=	TPCN2[m] ;
+						if(m<TPCN3.length)
+						TPCS[m] +=	TPCN3[m] ;
 					}
 
 					double largestValue = getLargestValue(TPCS); 
@@ -417,6 +428,8 @@ public class SmartNode{
 					if(converging_iterations>=MAX_CONVERGING_ITERATIONS)
 					{	
 						stop = true;
+						System.out.println("Output converged!");
+						printOutput();
 						//TODO : Communicate to network to stop
 					}
 				}
@@ -491,7 +504,13 @@ public class SmartNode{
 
 			for(int i=0;i<24;i++)
 			{			
-				currentTPCS[i] = TPCN1[i] + TPCN2[i] + TPCN3[i];
+				currentTPCS[i]=0;
+				if(i<TPCN1.length)
+				currentTPCS[i] += TPCN1[i] ;
+				if(i<TPCN2.length)
+				currentTPCS[i] += TPCN2[i] ;
+				if(i<TPCN3.length)
+				currentTPCS[i] += TPCN3[i] ;
 			}
 			writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt",currentTPCS);
 		}
@@ -898,7 +917,9 @@ public class SmartNode{
 		}
 		return 0;
 	}
-
+	/**
+	 * When exception occurs,the following msg is printed
+	 */
 	private static void printExceptionMessage()
 	{
 		System.out.println("Connection probably lost ");
@@ -907,6 +928,23 @@ public class SmartNode{
 			System.out.println("Best PAR so far "+ bestPAR);
 		else
 			System.out.println("Best Variance so far "+ bestVar);
+	}
+	/**
+	 * The following output is printed as an output
+	 */
+	private static void printOutput() {
+		System.out.println("Smart Grid Application Complete");
+		
+		if(objective == 1)
+		{
+			System.out.println(bestPAR);
+			System.out.println(bestTPCS);
+		}
+		else
+		{
+			System.out.println(bestVar);
+			System.out.println(bestTPCS);
+		}
 	}
 
 	/**
@@ -922,7 +960,7 @@ public class SmartNode{
 		public void run()
 		{
 
-			System.out.println("Entered server");
+			//System.out.println("Entered server");
 			ArrayList<Socket> serverSocket = new ArrayList<Socket>();
 			String[] ipAddressPortNumber;
 			String ipAddress;
@@ -975,23 +1013,12 @@ public class SmartNode{
 						public void run() {
 							// TODO Auto-generated method stub
 
-							System.out.println("Entered client");
+							//System.out.println("Entered client");
 							noOfIterations++;
+							System.out.println("Currently at iteration no. "+ noOfIterations+" out of "+ maxNoOfIterations);
 							if(noOfIterations > maxNoOfIterations)
 							{
-								System.out.println("Smart Grid Application Complete");
-								printResult();
-
-								if(objective == 1)
-								{
-									System.out.println(bestPAR);
-									System.out.println(bestTPCS);
-								}
-								else
-								{
-									System.out.println(bestVar);
-									System.out.println(bestTPCS);
-								}
+								printOutput();
 								System.exit(0);
 							}
 							//Request for file and receive file from other two nodes
@@ -1057,6 +1084,7 @@ public class SmartNode{
 								printExceptionMessage();
 							}
 						}
+
 
 						private void printResult() {
 							// TODO Auto-generated method stub
@@ -1157,6 +1185,7 @@ public class SmartNode{
 						}
 
 
+
 					}.start();
 					clientModeEnabled = false;
 				}
@@ -1171,7 +1200,7 @@ public class SmartNode{
 							new DataOutputStream(
 									connectionSocket.getOutputStream());
 					String clientMessage = inFromClient.readLine();
-					System.out.println(clientMessage);
+					//System.out.println(clientMessage);
 					if(clientMessage.equalsIgnoreCase("TPCN_Request"))
 					{
 						String fileContents;
