@@ -1067,7 +1067,7 @@ public class SmartNode{
 
 							createChart(TPCS);
 
-							System.out.println("Chosen power profile of appliances");
+							System.out.println("Chosen power profile of appliances\n");
 							for(int i=0;i<2;i++)
 							{
 								for(int j=0;j<24;j++)
@@ -1077,7 +1077,7 @@ public class SmartNode{
 							}
 
 							try{
-								System.out.println("Total power consumption (TPCS) ");
+								System.out.println("Total power consumption (TPCS) \n");
 								for(int i=0;i<24;i++)
 								{
 									System.out.print(Double.toString(TPCS[i]));
@@ -1085,11 +1085,11 @@ public class SmartNode{
 							}
 							catch(Exception e)
 							{
-								System.out.println("File is invalid");
+								System.out.println("File is invalid\n");
 							}
 
 							try{
-								System.out.println("Total power consumption of Node 1 (TPCN1); ");
+								System.out.println("Total power consumption of Node 1 (TPCN1) \n");
 								for(int i=0;i<24;i++)
 								{
 									System.out.print(Double.toString(TPCN1[i]));
@@ -1100,18 +1100,18 @@ public class SmartNode{
 							}
 
 							try{
-								System.out.println("Total power consumption of Node 2 (TPCN2); ");
+								System.out.println("Total power consumption of Node 2 (TPCN2) \n");
 								for(int i=0;i<24;i++)
 								{
 									System.out.print(Double.toString(TPCN2[i]));
 								}
 							}catch(Exception e)
 							{
-								System.out.println("Node 2 data is invalid");
+								System.out.println("Node 2 data is invalid \n");
 							}
 
 							try{
-								System.out.println("Total power consumption of Node 3 (TPCN3); ");
+								System.out.println("Total power consumption of Node 3 (TPCN3) \n");
 								for(int i=0;i<24;i++)
 								{
 									System.out.print(Double.toString(TPCN3[i]));
@@ -1123,36 +1123,36 @@ public class SmartNode{
 							if(objective==1)
 							{
 								double TPAR = getLargestValue(TPCS)/getAvgPCS(TPCS);	
-								System.out.println("Minimum PAR of system is = " + Double.toString(TPAR));
+								System.out.println("Minimum PAR of system is = " + Double.toString(TPAR) + "\n");
 
 								double PAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
-								System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1));
+								System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1) + "\n");
 
 								double PAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
-								System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2));
+								System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2) + "\n");
 
 								double PAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
-								System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3));
+								System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3) + "\n");
 
-								System.out.println("Number of iterations = " + noOfIterations);
+								System.out.println("Number of iterations = " + noOfIterations + "\n");
 
 							}
 
 							else if(objective==2)
 							{
 								double TVAR = getVariance(TPCS, getAvgPCS(TPCS));	
-								System.out.println("Minimum Variance of system is = " + Double.toString(TVAR));
+								System.out.println("Minimum Variance of system is = " + Double.toString(TVAR)+ "\n");
 
 								double VAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
-								System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1));
+								System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1)+ "\n");
 
 								double VAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
-								System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2));
+								System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2)+ "\n");
 
 								double VAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
-								System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3));
+								System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3)+ "\n");
 
-								System.out.println("Number of iterations = " + noOfIterations);
+								System.out.println("Number of iterations = " + noOfIterations+ "\n");
 							}
 						}
 
