@@ -55,6 +55,7 @@ public class SmartNode{
 	static double bestVar,bestPAR;
 	static ArrayList<String> Constraints; 
 	static int node1finished, node2finished, node3finished = 0;
+	static int node1active = 1, node2active =1 , node3active = 1;
 	static double MINIMUM_DIFFERENCE = 0.001;
 	static String FILE_ERR_MSG= "Error in File";
 	static Boolean stop = false;
@@ -429,7 +430,7 @@ public class SmartNode{
 					{	
 						stop = true;
 						System.out.println("Output converged!");
-						printOutput();
+						printResult();
 						//TODO : Communicate to network to stop
 					}
 				}
@@ -858,7 +859,19 @@ public class SmartNode{
 	 */
 	private static int getNextNode()
 	{
-
+		if(node1active == 0 && currentNode==2)
+			return 3;
+		if(node1active == 0 && currentNode==1)
+			return 2;
+		if(node2active == 0 && currentNode==3)
+			return 1;
+		if(node2active == 0 && currentNode==1)
+			return 3;
+		if(node3active == 0 && currentNode==1)
+			return 2;
+		if(node3active == 0 && currentNode==3)
+			return 1;
+		
 		if(currentNode == 1)
 		{
 			node1finished = 1;
@@ -915,6 +928,7 @@ public class SmartNode{
 				return randInt(1,2);			
 			}
 		}
+
 		return 0;
 	}
 	/**
@@ -922,30 +936,110 @@ public class SmartNode{
 	 */
 	private static void printExceptionMessage()
 	{
-		System.out.println("Connection probably lost ");
-		System.out.println("Code terminated at iteration no "+ noOfIterations);
-		if(objective==1)
-			System.out.println("Best PAR so far "+ bestPAR);
-		else
-			System.out.println("Best Variance so far "+ bestVar);
+		System.out.println("Code terminated at iteration no"+ noOfIterations);
+		printResult();
 	}
 	/**
 	 * The following output is printed as an output
 	 */
-	private static void printOutput() {
-		System.out.println("Smart Grid Application Complete");
-		
-		if(objective == 1)
+	private static void printResult() {
+		// TODO Auto-generated method stub
+		double[] TPCS  = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCS.txt");
+		double[] TPCN1 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_1.txt");
+		double[] TPCN2 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_2.txt");
+		double[] TPCN3 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_3.txt");
+
+		createChart(TPCS);
+
+		System.out.println("Chosen power profile of appliances");
+		for(int i=0;i<2;i++)
 		{
-			System.out.println(bestPAR);
-			System.out.println(bestTPCS);
+			for(int j=0;j<24;j++)
+			{
+				System.out.print(Double.toString(appliancePowerProfile[9+i][j]));
+			}
 		}
-		else
+
+		try{
+			System.out.println("Total power consumption (TPCS) ");
+			for(int i=0;i<24;i++)
+			{
+				System.out.print(Double.toString(TPCS[i]));
+			}
+		}
+		catch(Exception e)
 		{
-			System.out.println(bestVar);
-			System.out.println(bestTPCS);
+			System.out.println("File is invalid");
+		}
+
+		try{
+			System.out.println("Total power consumption of Node 1 (TPCN1); ");
+			for(int i=0;i<24;i++)
+			{
+				System.out.print(Double.toString(TPCN1[i]));
+			}
+		}catch(Exception e)
+		{
+			System.out.println("Node 1 data is invalid");
+		}
+
+		try{
+			System.out.println("Total power consumption of Node 2 (TPCN2); ");
+			for(int i=0;i<24;i++)
+			{
+				System.out.print(Double.toString(TPCN2[i]));
+			}
+		}catch(Exception e)
+		{
+			System.out.println("Node 2 data is invalid");
+		}
+
+		try{
+			System.out.println("Total power consumption of Node 3 (TPCN3); ");
+			for(int i=0;i<24;i++)
+			{
+				System.out.print(Double.toString(TPCN3[i]));
+			}
+		}catch(Exception e)
+		{
+			System.out.println("Node 3 data is invalid");
+		}
+		if(objective==1)
+		{
+			double TPAR = getLargestValue(TPCS)/getAvgPCS(TPCS);	
+			System.out.println("Minimum PAR of system is = " + Double.toString(TPAR));
+
+			double PAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+			System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1));
+
+			double PAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+			System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2));
+
+			double PAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+			System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3));
+
+			System.out.println("Number of iterations = " + noOfIterations);
+
+		}
+
+		else if(objective==2)
+		{
+			double TVAR = getVariance(TPCS, getAvgPCS(TPCS));	
+			System.out.println("Minimum Variance of system is = " + Double.toString(TVAR));
+
+			double VAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+			System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1));
+
+			double VAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+			System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2));
+
+			double VAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+			System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3));
+
+			System.out.println("Number of iterations = " + noOfIterations);
 		}
 	}
+
 
 	/**
 	 * This method starts a new thread to run server code
@@ -1008,7 +1102,7 @@ public class SmartNode{
 						String ipAddress;
 						Integer portNumber;
 						String messageToServer;
-
+						Socket clientSocket;
 						@Override
 						public void run() {
 							// TODO Auto-generated method stub
@@ -1018,14 +1112,16 @@ public class SmartNode{
 							System.out.println("Currently at iteration no. "+ noOfIterations+" out of "+ maxNoOfIterations);
 							if(noOfIterations > maxNoOfIterations)
 							{
-								printOutput();
+								System.out.println("Smart Grid Application Complete");
+								printResult();
 								System.exit(0);
 							}
 							//Request for file and receive file from other two nodes
+							int i=0;
 							try
 							{
 								messageToServer = "TPCN_Request";
-								for(int i =1;i<= noOfNodes ;i++)
+								for(i =1;i<= noOfNodes ;i++)
 								{
 									if(i != currentNode)
 									{
@@ -1045,154 +1141,78 @@ public class SmartNode{
 										clientSocket.close();  
 									}
 								}
-								adjustPowerProfile();
-								//Round robin
-								//								if(currentNode == noOfNodes)
-								//									nextNode = 1;
-								//								else
-								//									nextNode = currentNode + 1;
-
-								//Obtain next node randomly
-								nextNode = getNextNode();
-								if(nextNode==0)
-								{
-									System.out.println("No node has not been assigned as client");
-								}
-
-								//Send message to next node to change to client mode
-								messageToServer = "Change_To_Client"+":"+bestTPCS+":"+String.valueOf(node1finished)+":"+String.valueOf(node2finished)+":"+String.valueOf(node3finished);
-								String minTPCS = messageToServer.split(":")[1];
-								ipAddressPortNumber = ipAddressList.get(nextNode).split(" ");
-								ipAddress = ipAddressPortNumber[0];
-								portNumber = Integer.parseInt(ipAddressPortNumber[1]);
-								Socket clientSocket = new Socket(ipAddress, portNumber);
-								DataOutputStream outToServer = new DataOutputStream(
-										clientSocket.getOutputStream());
-								BufferedReader inFromServer = 
-										new BufferedReader(new InputStreamReader(
-												clientSocket.getInputStream()));	
-								outToServer.writeBytes(messageToServer+"\n");
-								clientSocket.close();
+								
 							}
 							catch(Exception e)
 							{
 								System.out.println(e.getMessage());	
-								if(e.getMessage().equalsIgnoreCase("Connection Refused"))
+//								if(e.getMessage().equalsIgnoreCase("Connection Refused"))
+//								{
+//									adjustPowerProfile();
+//								}
+								printExceptionMessage();
+								if(i==1)
+									node1active = 0;
+								if(i==2)
+									node2active = 0;
+								if(i==3)
+									node3active = 0;
+							}
+							finally
+							{
+								try
 								{
 									adjustPowerProfile();
+									//Obtain next node randomly : no priority
+										nextNode = getNextNode();
+										if(nextNode==0)
+										{
+											System.out.println("No node has not been assigned as client");
+										}
+								
+
+									//Send message to next node to change to client mode
+									messageToServer = "Change_To_Client"+":"+bestTPCS+":"+String.valueOf(node1finished)+":"+String.valueOf(node2finished)+":"+String.valueOf(node3finished);
+									String minTPCS = messageToServer.split(":")[1];
+									ipAddressPortNumber = ipAddressList.get(nextNode).split(" ");
+									ipAddress = ipAddressPortNumber[0];
+									portNumber = Integer.parseInt(ipAddressPortNumber[1]);
+									
+									clientSocket = new Socket(ipAddress, portNumber);
+									DataOutputStream outToServer = new DataOutputStream(
+											clientSocket.getOutputStream());
+									BufferedReader inFromServer = 
+											new BufferedReader(new InputStreamReader(
+													clientSocket.getInputStream()));
+									outToServer.writeBytes(messageToServer+"\n");
+									clientSocket.close();
 								}
-								printExceptionMessage();
+								catch(Exception e)
+								{
+									System.out.println(e.getMessage());	
+									if(e.getMessage().equalsIgnoreCase("Connection Refused"))
+									{
+										adjustPowerProfile();
+									}
+									printExceptionMessage();
+								}
+								
+								
 							}
 						}
 
 
-						private void printResult() {
-							// TODO Auto-generated method stub
-							double[] TPCS  = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCS.txt");
-							double[] TPCN1 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_1.txt");
-							double[] TPCN2 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_2.txt");
-							double[] TPCN3 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_3.txt");
-
-							createChart(TPCS);
-
-							System.out.println("Chosen power profile of appliances");
-							for(int i=0;i<2;i++)
-							{
-								for(int j=0;j<24;j++)
-								{
-									System.out.print(Double.toString(appliancePowerProfile[9+i][j]));
-								}
-							}
-
-							try{
-								System.out.println("Total power consumption (TPCS) ");
-								for(int i=0;i<24;i++)
-								{
-									System.out.print(Double.toString(TPCS[i]));
-								}
-							}
-							catch(Exception e)
-							{
-								System.out.println("File is invalid");
-							}
-
-							try{
-								System.out.println("Total power consumption of Node 1 (TPCN1); ");
-								for(int i=0;i<24;i++)
-								{
-									System.out.print(Double.toString(TPCN1[i]));
-								}
-							}catch(Exception e)
-							{
-								System.out.println("Node 1 data is invalid");
-							}
-
-							try{
-								System.out.println("Total power consumption of Node 2 (TPCN2); ");
-								for(int i=0;i<24;i++)
-								{
-									System.out.print(Double.toString(TPCN2[i]));
-								}
-							}catch(Exception e)
-							{
-								System.out.println("Node 2 data is invalid");
-							}
-
-							try{
-								System.out.println("Total power consumption of Node 3 (TPCN3); ");
-								for(int i=0;i<24;i++)
-								{
-									System.out.print(Double.toString(TPCN3[i]));
-								}
-							}catch(Exception e)
-							{
-								System.out.println("Node 3 data is invalid");
-							}
-							if(objective==1)
-							{
-								double TPAR = getLargestValue(TPCS)/getAvgPCS(TPCS);	
-								System.out.println("Minimum PAR of system is = " + Double.toString(TPAR));
-
-								double PAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
-								System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1));
-
-								double PAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
-								System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2));
-
-								double PAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
-								System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3));
-
-								System.out.println("Number of iterations = " + noOfIterations);
-
-							}
-
-							else if(objective==2)
-							{
-								double TVAR = getVariance(TPCS, getAvgPCS(TPCS));	
-								System.out.println("Minimum Variance of system is = " + Double.toString(TVAR));
-
-								double VAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
-								System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1));
-
-								double VAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
-								System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2));
-
-								double VAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
-								System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3));
-
-								System.out.println("Number of iterations = " + noOfIterations);
-							}
-						}
-
-
+						
 
 					}.start();
 					clientModeEnabled = false;
 				}
 				try
 				{
+					System.out.println("Waiting for connection from client");
 					Socket connectionSocket = welcomeSocket.accept();
 					serverSocket.add(connectionSocket);
+					
 					BufferedReader inFromClient = 
 							new BufferedReader(new InputStreamReader(
 									connectionSocket.getInputStream()));
