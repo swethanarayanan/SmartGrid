@@ -23,14 +23,14 @@ public class SmartNode{
 	/**
 	 * @TODO : maxNoOfIterations to be updated by Abhishek
 	 */
-	static int maxNoOfIterations = 1000;
+	static int maxNoOfIterations = 2;
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
 	static boolean clientModeEnabled= false;
 	static String bestTPCS="";
 	static int currentNode;
 	static int objective;
-	static double bestPeak,bestVar;
+	static double bestVar,bestPAR;
 	static ArrayList<String> Constraints; 
 	static double[] appliancePowerConsumption = null ;
 	static int[][] appliancePowerProfile = {
@@ -172,7 +172,8 @@ public class SmartNode{
 					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
 				}
 				double avg = getAvgPCS(TPCS);
-				if(getVariance(TPCS, avg)<variance)
+				double currentvar = getVariance(TPCS, avg);
+				if(currentvar < variance)
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
 					{
@@ -266,6 +267,8 @@ public class SmartNode{
 		double[] TPCN3 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_3.txt");
 
 		double peak = Double.MAX_VALUE;
+		double PAR = Double.MAX_VALUE;
+		double avg;
 		//Extensive search
 
 		int [][] selectedPowerProfile =appliancePowerProfile.clone();
@@ -311,17 +314,14 @@ public class SmartNode{
 					TPCN2 = TPCN.clone();
 				else if(currentNode == 3)
 					TPCN3 = TPCN.clone();
-
-				double largestValue = getLargestValue(TPCS);
-				System.out.println("largestValue is"+ largestValue);
 			
 				for(int m=0;m<24;m++)
 				{			
 					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
 					
 				}
-				double avg = getAvgPCS(TPCS);
-				largestValue = getLargestValue(TPCS);
+				
+				double largestValue = getLargestValue(TPCS); 
 				System.out.println("largestValue is"+ largestValue);
 				
 				if(largestValue<peak)
@@ -331,6 +331,8 @@ public class SmartNode{
 						selectedPowerProfile[n] = tempPowerProfile[n].clone();
 					}
 					peak = getLargestValue(TPCS);
+					avg = getAvgPCS(TPCS);
+					PAR = peak / avg ;
 					currentBestTPCS =  TPCS.clone();
 					currentBestTPCN1 = TPCN1.clone();
 					currentBestTPCN2 = TPCN2.clone();
@@ -344,9 +346,8 @@ public class SmartNode{
 		if(!bestTPCS.isEmpty())
 		{
 
-			bestPeak = getLargestValue(bestTPCSArray);
-
-			if(peak < bestPeak)
+			bestPAR = getLargestValue(bestTPCSArray)/getAvgPCS(bestTPCSArray);
+			if(PAR < bestPAR)
 			{
 				for(int k =0;k < 24;k++)
 				{
@@ -354,7 +355,7 @@ public class SmartNode{
 					appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
 				}
 				bestTPCS = getStringFromTPCS(currentBestTPCS);
-				bestPeak = peak;
+				bestPAR = PAR;
 				
 				if(currentNode==1)
 					writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
@@ -374,7 +375,7 @@ public class SmartNode{
 				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
 			}
 			bestTPCS = getStringFromTPCS(currentBestTPCS);
-			bestPeak = peak;
+			bestPAR = PAR;
 			
 			if(currentNode==1)
 				writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
@@ -689,7 +690,7 @@ public class SmartNode{
 								 */
 								System.out.println(noOfIterations);
 								//print appliance power profile
-								System.out.println(bestPeak);
+								System.out.println(bestPAR);
 								System.out.println(bestVar);
 								System.exit(0);
 							}
