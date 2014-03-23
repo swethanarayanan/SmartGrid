@@ -20,18 +20,32 @@ import java.util.Scanner;
 //import de.progra.charting.model.DefaultChartDataModel;
 //import de.progra.charting.render.LineChartRenderer;
 
-//TPCS : Total Power Consumption of System
-//TPCN : Total Power Consumption of Node
-//TPC : Total Power Consumption
+/**
+ * Acronyms Used in this code
+ * TPC : TPC : Total Power Consumption
+ * TPCS : Total Power Consumption of System
+ * TPCN : Total Power Consumption of Node
+ * TPCN1 : Total Power Consumption of Node 1
+ * TPCN2 : Total Power Consumption of Node 2
+ * TPCN3 : Total Power Consumption of Node 3
+ * PAR : Peak to Average
+ */
 
+/**
+ * This class implements the client and server codes for a single smart node in a smart grid system
+ * @author swethanarayanan and abhishekravi
+ *
+ */
 public class SmartNode{
 
-	//no of iterations = no of times I became a client
-	static int noOfIterations = 0;
-	/**
-	 * @TODO : maxNoOfIterations to be updated by Abhishek
-	 */
-	static int maxNoOfIterations = 2;
+	//no of times a node becomes a client
+	static int noOfIterations = 0;	
+	// Node 1 has 63 possible flexible appliance power profile configurations
+	// Node 2 has 72 possible flexible appliance power profile configurations
+	// Node 3 has 63 possible flexible appliance power profile configurations
+	//maximum no of times a node becomes a client : calculated to be 63 * 72 * 63 = 285768 
+	static int maxNoOfIterations = 2; 
+	//No of nodes in this prototype system has been fixed to be 3
 	static int noOfNodes = 3;
 	static HashMap<Integer,String> ipAddressList = new HashMap<Integer,String>();
 	static boolean clientModeEnabled= false;
@@ -81,10 +95,13 @@ public class SmartNode{
 		runServer(currentNode);	
 	}
 
+	/**
+	 * This method finds the adjusted power profile based on the objective specified
+	 * @throws Exception
+	 */
 	private static void adjustPowerProfile() throws Exception {
 
 		writeTPCSToFile();
-
 		if(objective==1)
 		{
 			minimizePAR();
@@ -93,18 +110,17 @@ public class SmartNode{
 		{	
 			minimizeVariance();
 		}
-		/**
-		 * @TODO : if objective 1 (PAR) or objective 2(Variance)
-		 */
-		/**
-		 * @TODO if new currentTPCS(PAR) < bestTPCS(PAR) then bestTPCS = currentTPCS
-		 * 
-		 */
 	}
 
+	/**
+	 * This method minimizes variance of the system. 
+	 * We iterate through all possible appliance power profiles(i.e extensive search) and find the corresponding power consumption of node
+	 * Then we find the total power consumption of the system and find the current variance.
+	 * If the current variance is lesser than the best variance obtained so far, then the best variance becomes current variance
+	 * @throws Exception
+	 */
 	private static void minimizeVariance() throws Exception {
-		// TODO Auto-generated method stub
-
+		
 		double[] currentBestTPCS =  new double[24];
 		double[] currentBestTPCN1 = new double[24];
 		double[] currentBestTPCN2 = new double[24];
@@ -261,7 +277,13 @@ public class SmartNode{
 		}
 	}
 
-
+	/**
+	 * This method minimizes PAR of the system. 
+	 * We iterate through all possible appliance power profiles(i.e extensive search) and find the corresponding power consumption of node
+	 * Then we find the total power consumption of the system and find the current variance.
+	 * If the current PAR is lesser than the best PAR obtained so far, then the best PAR becomes current PAR
+	 * @throws Exception
+	 */
 	private static void minimizePAR() throws Exception {
 
 		double[] currentBestTPCS =  new double[24];
@@ -436,7 +458,10 @@ public class SmartNode{
 
 	}
 
-
+	/**
+	 * This method writes TPCS to TPCS.txt file
+	 * @throws Exception
+	 */
 	private static void writeTPCSToFile() throws Exception
 	{
 		double[] currentTPCS= new double[24];
@@ -451,6 +476,10 @@ public class SmartNode{
 		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt",currentTPCS);
 	}
 
+	/**
+	 * @return This method returns a string of 24 TPCS values separated by space from TPCS array of 24 numbers
+	 * @throws Exception
+	 */
 	private static String getStringFromTPCS(double[] TPCS) {
 
 		String bestTPCS = "";
@@ -461,6 +490,11 @@ public class SmartNode{
 
 		return bestTPCS;
 	}
+	
+	/**
+	 * @return This method returns a TPCS array of 24 numbers from a string of 24 TPCS values separated by space
+	 * @throws Exception
+	 */
 	private static double[] getTPCSfromString(String bestTPCS) {
 
 		double[] value = new double[24];
@@ -472,7 +506,9 @@ public class SmartNode{
 		return value;
 	}
 
-
+	/**
+	 * @return This method calculates the total no of iterations for all possible flexible appliance power profile configurations
+	 */
 	private static int getTotalIterations(int duration1, int start1, int end1) {
 
 		int iter1 = 0;
@@ -491,6 +527,9 @@ public class SmartNode{
 		return iter1;		
 	}
 
+	/**
+	 * @return This method returns variance given an array of 24 numbers and avg of the 24 numbers
+	 */
 	private static double getVariance(double[] TPCS, double avg) {
 
 		double variance = 0;
@@ -502,6 +541,9 @@ public class SmartNode{
 
 		return variance;
 	}
+	/**
+	 * @return This method returns the largest number of an array
+	 */
 	private static double getLargestValue(double[] TPCS) {
 
 		double largest = 0;
@@ -512,6 +554,9 @@ public class SmartNode{
 		}
 		return largest;
 	}
+	/**
+	 * @return This method returns the average of all the values of an array
+	 */
 	private static double getAvgPCS(double[] TPCS) {
 
 		double sum=0;
@@ -523,7 +568,11 @@ public class SmartNode{
 		return sum/24.0;
 
 	}
-
+	/**
+	 * @param filePath
+	 * @return This method reads the contents of a file into a string of 24 numbers separated by space
+	 * @throws Exception
+	 */
 	private static String readFileIntoString(String filePath) throws Exception {
 
 		String fileContents="";
@@ -543,6 +592,11 @@ public class SmartNode{
 		}
 		return fileContents;
 	}
+	/**
+	 * @param filePath
+	 * @return This method reads the contents of a file into a double array of 24 values
+	 * @throws Exception
+	 */
 	private static double[] readFileIntoDoubleArray(String filePath) throws Exception {
 
 		double[] TPC= new double[24];
@@ -561,7 +615,13 @@ public class SmartNode{
 		return TPC;
 
 	}
-	private static void writeStringArrayToFile(String filePath,String fileInput) throws Exception 
+	/**
+	 * This method writes the contents of a string separated by spaces into a file
+	 * @param filePath
+	 * @param fileInput
+	 * @throws Exception
+	 */
+	private static void writeStringToFile(String filePath,String fileInput) throws Exception 
 	{
 		String[] TPC = fileInput.split(" ");
 		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
@@ -571,6 +631,12 @@ public class SmartNode{
 		}
 		writer.close();
 	}
+	/**
+	 * This method writes the contents of a double array into a file
+	 * @param filePath
+	 * @param TPC
+	 * @throws Exception
+	 */
 	private static void writeDoubleArrayToFile(String filePath,double TPC[]) throws Exception {
 
 		PrintWriter writer = new PrintWriter(filePath, "UTF-8");
@@ -580,13 +646,15 @@ public class SmartNode{
 		}
 		writer.close();
 	}
-
+	/**
+	 * This method initializes power data for the node based on the project data set provided.
+	 * @param currentNode
+	 * @throws Exception
+	 */
 	private static void initializePowerData(int currentNode) throws Exception {
 
 		//Data
 		//11 by 24 matrix
-
-
 		Constraints = new ArrayList<String>();
 		String constraint1= null,constraint2=null;
 		//1 by 11 matrix
@@ -619,10 +687,8 @@ public class SmartNode{
 		}
 		Constraints.add(constraint1);
 		Constraints.add(constraint2);
-		/**
-		 * @TODO Random power profile of flexible appliances
-		 */
 
+		//Random power profile of flexible appliances
 		for(int i=0;i<2;i++)
 		{
 			int duration = Integer.parseInt(Constraints.get(i).split(" ")[0]);
@@ -643,6 +709,11 @@ public class SmartNode{
 		//create TPCN_x file
 		writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(currentNode)+".txt",TPCN);		
 	}
+	/**
+	 * @param appliancePowerConsumption
+	 * @param appliancePowerProfile
+	 * @return 24 hour power consumption data of the node
+	 */
 	private static double[] calculateNodePowerConsumption(
 			double[] appliancePowerConsumption, int [][] appliancePowerProfile) {
 		double[] TPCN= new double[24];
@@ -657,6 +728,11 @@ public class SmartNode{
 		}
 		return TPCN;
 	}
+	/**
+	 * @param min
+	 * @param max
+	 * @return random integer between min to max
+	 */
 	public static int randInt(int min, int max) {
 
 		// Usually this can be a field rather than a method variable
@@ -668,7 +744,10 @@ public class SmartNode{
 
 		return randomNum;
 	}
-
+	/**
+	 * Creates chart given TPCS data
+	 * @param tPCS
+	 */
 	public static void createChart(double[] tPCS)
 	{
 		double[][] model = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};     // Create data array
@@ -704,7 +783,9 @@ public class SmartNode{
 //			e.printStackTrace();
 //		}
 	}
-	
+	/**
+	 * @return Obtains next node to act as client
+	 */
 	private static int getNextNode()
 	{
 
@@ -768,7 +849,12 @@ public class SmartNode{
 	}
 
 
-
+	/**
+	 * This method starts a new thread to run server code
+	 * The server receives messages from the node acting as client and returns the information required by the node
+	 * When it receives message to act as client, it starts a new thread to run client code
+	 * @param currentNode
+	 */
 	private static void runServer(final int currentNode){(new Thread(){
 
 		//Server is continuously running
@@ -859,23 +945,20 @@ public class SmartNode{
 										outToServer.writeBytes(messageToServer+"\n");
 										String fileInput = inFromServer.readLine();
 										//System.out.println(fileInput);
-										writeStringArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
+										writeStringToFile(System.getProperty("user.dir")+File.separator+"TPCN_"+String.valueOf(i)+".txt", fileInput);    
 										clientSocket.close();  
 									}
 								}
 								adjustPowerProfile();
-								//Find the next node to be client
-								//Round Robin ok?
-
-								/*if(currentNode == noOfNodes)
+								if(currentNode == noOfNodes)
 									nextNode = 1;
 								else
-									nextNode = currentNode + 1;*/
-								nextNode = getNextNode();
-								if(nextNode==0)
-								{
-									System.out.println("Ooops!");
-								}
+									nextNode = currentNode + 1;
+//								nextNode = getNextNode();
+//								if(nextNode==0)
+//								{
+//									System.out.println("Ooops!");
+//								}
 
 								//Send message to next node to change to client mode
 								messageToServer = "Change_To_Client"+":"+bestTPCS;
@@ -905,7 +988,6 @@ public class SmartNode{
 				try
 				{
 					Socket connectionSocket = welcomeSocket.accept();
-					//System.out.println(connectionSocket.toString());
 					BufferedReader inFromClient = 
 							new BufferedReader(new InputStreamReader(
 									connectionSocket.getInputStream()));
