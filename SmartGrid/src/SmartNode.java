@@ -40,6 +40,10 @@ public class SmartNode{
 	static double bestPeak,bestVar;
 	static ArrayList<String> Constraints; 
 	static int node1finished, node2finished, node3finished = 0;
+	static double MINIMUM_DIFFERENCE = 0.001;
+	static Boolean stop = false;
+	static int converging_iterations = 0;
+	static int MAX_CONVERGING_ITERATIONS = 10;
 	static double[] appliancePowerConsumption = null ;
 	static int[][] appliancePowerProfile = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -200,7 +204,20 @@ public class SmartNode{
 		if(!bestTPCS.isEmpty())
 		{
 			bestVar = getVariance(bestTPCSArray,getAvgPCS(bestTPCSArray));
-
+			if(Math.abs(bestVar-variance)<MINIMUM_DIFFERENCE)
+			{
+				converging_iterations++;
+				if(converging_iterations>=MAX_CONVERGING_ITERATIONS)
+				{	
+					stop = true;
+					//TODO : Communicate to network to stop
+				}
+			}
+			else
+			{
+				converging_iterations=0;
+			}
+			
 			if(variance < bestVar)
 			{
 				for(int k =0;k < 24;k++)
@@ -354,6 +371,21 @@ public class SmartNode{
 
 			bestPeak = getLargestValue(bestTPCSArray);
 
+			if(Math.abs(peak-bestPeak)<MINIMUM_DIFFERENCE)
+			{
+				converging_iterations++;
+				if(converging_iterations>=MAX_CONVERGING_ITERATIONS)
+				{	
+					stop = true;
+					//TODO : Communicate to network to stop
+				}
+			}
+			else
+			{
+				converging_iterations=0;
+			}
+			
+			
 			if(peak < bestPeak)
 			{
 				for(int k =0;k < 24;k++)
