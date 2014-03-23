@@ -624,17 +624,17 @@ public class SmartNode{
 		{
 
 			BufferedReader br = new BufferedReader(new FileReader(filePath));
-				StringBuilder sb = new StringBuilder();
-				String line = br.readLine();
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
 
-				while (line != null) {
-					sb.append(line);
-					sb.append(" ");
-					line = br.readLine();
-				}
-				fileContents = sb.toString();
-				br.close();
-				
+			while (line != null) {
+				sb.append(line);
+				sb.append(" ");
+				line = br.readLine();
+			}
+			fileContents = sb.toString();
+			br.close();
+
 		}
 		catch(Exception e)
 		{
@@ -655,14 +655,14 @@ public class SmartNode{
 
 			int i =0;
 			BufferedReader br = new BufferedReader(new FileReader(filePath));
+			TPC[i] = Double.valueOf(br.readLine());
+			i++;
+			while (i<24) {		  	        	
 				TPC[i] = Double.valueOf(br.readLine());
 				i++;
-				while (i<24) {		  	        	
-					TPC[i] = Double.valueOf(br.readLine());
-					i++;
-				};
-				br.close();
-				
+			};
+			br.close();
+
 		}
 		catch(Exception e)
 		{
@@ -834,7 +834,7 @@ public class SmartNode{
 		int width = 640;                        // Image size
 		int height = 480;
 
-		 //Create data model
+		//Create data model
 		DefaultChartDataModel data = new DefaultChartDataModel(model, columns, rows);
 
 		// Create chart with default coordinate system
@@ -997,7 +997,7 @@ public class SmartNode{
 				System.out.println(e.getMessage());
 				printExceptionMessage();
 			}
-	
+
 			while(true) {			
 				if(clientModeEnabled)
 				{
@@ -1019,7 +1019,6 @@ public class SmartNode{
 							if(noOfIterations > maxNoOfIterations)
 							{
 								printOutput();
-								
 								System.exit(0);
 							}
 							//Request for file and receive file from other two nodes
@@ -1048,11 +1047,11 @@ public class SmartNode{
 								}
 								adjustPowerProfile();
 								//Round robin
-//								if(currentNode == noOfNodes)
-//									nextNode = 1;
-//								else
-//									nextNode = currentNode + 1;
-								
+								//								if(currentNode == noOfNodes)
+								//									nextNode = 1;
+								//								else
+								//									nextNode = currentNode + 1;
+
 								//Obtain next node randomly
 								nextNode = getNextNode();
 								if(nextNode==0)
@@ -1085,6 +1084,108 @@ public class SmartNode{
 								printExceptionMessage();
 							}
 						}
+
+
+						private void printResult() {
+							// TODO Auto-generated method stub
+							double[] TPCS  = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCS.txt");
+							double[] TPCN1 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_1.txt");
+							double[] TPCN2 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_2.txt");
+							double[] TPCN3 = readFileIntoDoubleArray(System.getProperty("user.dir")+File.separator+"TPCN_3.txt");
+
+							createChart(TPCS);
+
+							System.out.println("Chosen power profile of appliances");
+							for(int i=0;i<2;i++)
+							{
+								for(int j=0;j<24;j++)
+								{
+									System.out.print(Double.toString(appliancePowerProfile[9+i][j]));
+								}
+							}
+
+							try{
+								System.out.println("Total power consumption (TPCS) ");
+								for(int i=0;i<24;i++)
+								{
+									System.out.print(Double.toString(TPCS[i]));
+								}
+							}
+							catch(Exception e)
+							{
+								System.out.println("File is invalid");
+							}
+
+							try{
+								System.out.println("Total power consumption of Node 1 (TPCN1); ");
+								for(int i=0;i<24;i++)
+								{
+									System.out.print(Double.toString(TPCN1[i]));
+								}
+							}catch(Exception e)
+							{
+								System.out.println("Node 1 data is invalid");
+							}
+
+							try{
+								System.out.println("Total power consumption of Node 2 (TPCN2); ");
+								for(int i=0;i<24;i++)
+								{
+									System.out.print(Double.toString(TPCN2[i]));
+								}
+							}catch(Exception e)
+							{
+								System.out.println("Node 2 data is invalid");
+							}
+
+							try{
+								System.out.println("Total power consumption of Node 3 (TPCN3); ");
+								for(int i=0;i<24;i++)
+								{
+									System.out.print(Double.toString(TPCN3[i]));
+								}
+							}catch(Exception e)
+							{
+								System.out.println("Node 3 data is invalid");
+							}
+							if(objective==1)
+							{
+								double TPAR = getLargestValue(TPCS)/getAvgPCS(TPCS);	
+								System.out.println("Minimum PAR of system is = " + Double.toString(TPAR));
+
+								double PAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+								System.out.println("Minimum PAR of Node 1 is = " + Double.toString(PAR1));
+
+								double PAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+								System.out.println("Minimum PAR of Node 2 is = " + Double.toString(PAR2));
+
+								double PAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+								System.out.println("Minimum PAR of Node 3 is = " + Double.toString(PAR3));
+
+								System.out.println("Number of iterations = " + noOfIterations);
+
+							}
+
+							else if(objective==2)
+							{
+								double TVAR = getVariance(TPCS, getAvgPCS(TPCS));	
+								System.out.println("Minimum Variance of system is = " + Double.toString(TVAR));
+
+								double VAR1 = getLargestValue(TPCN1)/getAvgPCS(TPCN1);	
+								System.out.println("Minimum Variance of Node 1 is = " + Double.toString(VAR1));
+
+								double VAR2 = getLargestValue(TPCN2)/getAvgPCS(TPCN2);	
+								System.out.println("Minimum Variance of Node 2 is = " + Double.toString(VAR2));
+
+								double VAR3 = getLargestValue(TPCN3)/getAvgPCS(TPCN3);	
+								System.out.println("Minimum Variance of Node 3 is = " + Double.toString(VAR3));
+
+								System.out.println("Number of iterations = " + noOfIterations);
+							}
+						}
+
+
+
 					}.start();
 					clientModeEnabled = false;
 				}
