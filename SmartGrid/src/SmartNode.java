@@ -1,7 +1,10 @@
 
+import java.awt.Rectangle;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -11,6 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+
+//import de.progra.charting.ChartEncoder;
+//import de.progra.charting.DefaultChart;
+//import de.progra.charting.model.DefaultChartDataModel;
+//import de.progra.charting.render.LineChartRenderer;
 
 //TPCS : Total Power Consumption of System
 //TPCN : Total Power Consumption of Node
@@ -32,6 +40,11 @@ public class SmartNode{
 	static int objective;
 	static double bestVar,bestPAR;
 	static ArrayList<String> Constraints; 
+	static int node1finished, node2finished, node3finished = 0;
+	static double MINIMUM_DIFFERENCE = 0.001;
+	static Boolean stop = false;
+	static int converging_iterations = 0;
+	static int MAX_CONVERGING_ITERATIONS = 10;
 	static double[] appliancePowerConsumption = null ;
 	static int[][] appliancePowerProfile = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -193,7 +206,20 @@ public class SmartNode{
 		if(!bestTPCS.isEmpty())
 		{
 			bestVar = getVariance(bestTPCSArray,getAvgPCS(bestTPCSArray));
-
+			if(Math.abs(bestVar-variance)<MINIMUM_DIFFERENCE)
+			{
+				converging_iterations++;
+				if(converging_iterations>=MAX_CONVERGING_ITERATIONS)
+				{	
+					stop = true;
+					//TODO : Communicate to network to stop
+				}
+			}
+			else
+			{
+				converging_iterations=0;
+			}
+			
 			if(variance < bestVar)
 			{
 				for(int k =0;k < 24;k++)
@@ -203,7 +229,7 @@ public class SmartNode{
 				}
 				bestTPCS = getStringFromTPCS(currentBestTPCS);
 				bestVar =  variance;
-				
+
 				if(currentNode==1)
 					writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 				else if(currentNode == 2)
@@ -314,16 +340,16 @@ public class SmartNode{
 					TPCN2 = TPCN.clone();
 				else if(currentNode == 3)
 					TPCN3 = TPCN.clone();
-			
+
 				for(int m=0;m<24;m++)
 				{			
 					TPCS[m] = TPCN1[m] + TPCN2[m] + TPCN3[m];
-					
+
 				}
 				
 				double largestValue = getLargestValue(TPCS); 
 				System.out.println("largestValue is"+ largestValue);
-				
+
 				if(largestValue<peak)
 				{
 					for (int n = 0; n < selectedPowerProfile.length; n++) 
@@ -341,12 +367,29 @@ public class SmartNode{
 			}
 
 		}
-		
-		
+
+
 		if(!bestTPCS.isEmpty())
 		{
 
 			bestPAR = getLargestValue(bestTPCSArray)/getAvgPCS(bestTPCSArray);
+			
+
+			if(Math.abs(PAR - bestPAR)<MINIMUM_DIFFERENCE)
+			{
+				converging_iterations++;
+				if(converging_iterations>=MAX_CONVERGING_ITERATIONS)
+				{	
+					stop = true;
+					//TODO : Communicate to network to stop
+				}
+			}
+			else
+			{
+				converging_iterations=0;
+			}
+			
+			
 			if(PAR < bestPAR)
 			{
 				for(int k =0;k < 24;k++)
@@ -357,6 +400,7 @@ public class SmartNode{
 				bestTPCS = getStringFromTPCS(currentBestTPCS);
 				bestPAR = PAR;
 				
+
 				if(currentNode==1)
 					writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 				else if(currentNode == 2)
@@ -375,8 +419,9 @@ public class SmartNode{
 				appliancePowerProfile[10][k] = selectedPowerProfile[10][k];
 			}
 			bestTPCS = getStringFromTPCS(currentBestTPCS);
+
 			bestPAR = PAR;
-			
+
 			if(currentNode==1)
 				writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCN_1.txt", currentBestTPCN1);
 			else if(currentNode == 2)
@@ -387,7 +432,7 @@ public class SmartNode{
 			writeDoubleArrayToFile(System.getProperty("user.dir")+File.separator+"TPCS.txt", currentBestTPCS);
 
 		}
-		
+
 
 	}
 
@@ -624,6 +669,106 @@ public class SmartNode{
 		return randomNum;
 	}
 
+	public static void createChart(double[] tPCS)
+	{
+		double[][] model = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};     // Create data array
+
+		for(int i=0;i<24;i++)
+			model[0][i] = tPCS[i];
+
+		double[] columns = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};  // Create x-axis values
+
+		String[] rows = {"Power"};          // Create data set title
+
+		String title = "Total Power Consumption";          // Create diagram title
+
+		int width = 640;                        // Image size
+		int height = 480;
+
+		// Create data model
+//		DefaultChartDataModel data = new DefaultChartDataModel(model, columns, rows);
+//
+//		// Create chart with default coordinate system
+//		DefaultChart c = new DefaultChart(data, title, DefaultChart.LINEAR_X_LINEAR_Y);
+//
+//		// Add a line chart renderer
+//		c.addChartRenderer(new LineChartRenderer(c.getCoordSystem(), data), 1);
+//
+//		// Set the chart size
+//		c.setBounds(new Rectangle(0, 0, width, height));
+//
+//		// Export the chart as a PNG image
+//		try {
+//			ChartEncoder.createEncodedImage(new FileOutputStream(System.getProperty("user.home")+"/first.png"), c, "png");
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	private static int getNextNode()
+	{
+
+		if(currentNode == 1)
+		{
+			if(node2finished == 0 &&node3finished ==1)
+			{
+				return 2;
+			}
+			else if(node2finished == 1 &&node3finished ==0)
+			{
+				return 3;
+			}
+			else if(node2finished == 1 &&node3finished ==1)
+			{
+				node1finished = 1;
+				node2finished = 0;
+				node3finished = 0;
+				return randInt(2, 3);
+			}
+		}
+		else if(currentNode==2)
+		{
+			if(node1finished == 0 &&node3finished ==1)
+			{
+				return 1;
+			}
+			else if(node1finished == 1 &&node3finished ==0)
+			{
+				return 3;
+			}
+			else if(node1finished == 1 &&node3finished ==1)
+			{
+				node1finished = 0;
+				node2finished = 1;
+				node3finished = 0;
+				if(randInt(1,2)==1)
+					return 1;
+				else return 3;			
+			}
+		}
+		else if(currentNode==3)
+		{
+			if(node1finished == 0 &&node2finished ==1)
+			{
+				return 1;
+			}
+			else if(node1finished == 1 &&node2finished ==0)
+			{
+				return 2;
+			}
+			else if(node1finished == 1 &&node2finished ==1)
+			{
+				node1finished = 0;
+				node2finished = 0;
+				node3finished = 1;
+				return randInt(1,2);			
+			}
+		}
+		return 0;
+	}
+
+
+
 	private static void runServer(final int currentNode){(new Thread(){
 
 		//Server is continuously running
@@ -722,10 +867,15 @@ public class SmartNode{
 								//Find the next node to be client
 								//Round Robin ok?
 
-								if(currentNode == noOfNodes)
+								/*if(currentNode == noOfNodes)
 									nextNode = 1;
 								else
-									nextNode = currentNode + 1;
+									nextNode = currentNode + 1;*/
+								nextNode = getNextNode();
+								if(nextNode==0)
+								{
+									System.out.println("Ooops!");
+								}
 
 								//Send message to next node to change to client mode
 								messageToServer = "Change_To_Client"+":"+bestTPCS;
@@ -748,6 +898,7 @@ public class SmartNode{
 							}
 						}
 
+						
 					}.start();
 					clientModeEnabled = false;
 				}
